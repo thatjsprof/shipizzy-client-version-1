@@ -1,0 +1,12 @@
+.table {
+  overflow-x: hidden;
+
+  &:hover {
+    overflow-x: auto;
+  }
+
+  &__cell {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}

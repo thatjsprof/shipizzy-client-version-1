@@ -1,0 +1,43 @@
+.dashboard {
+  &__cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 2rem;
+  }
+
+  &__chart {
+    margin-top: 2.5rem;
+    background-color: #fff;
+    border: 0.1rem solid #ddd;
+    border-radius: 5px;
+    padding: 2rem 2rem 1rem 1rem;
+  }
+
+  &__section {
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "main main main aside aside";
+
+    &___main {
+      grid-area: main;
+    }
+
+    &___aside {
+      grid-area: aside;
+      background-color: #fff;
+      border: 0.1rem solid #ddd;
+      border-radius: 0.5rem;
+      padding: 1rem;
+
+      .icon {
+        border: 0.1rem solid #ddd;
+        border-radius: 0rem;
+        height: 4rem;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+    }
+  }
+}

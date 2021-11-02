@@ -1,0 +1,8 @@
+.settings {
+  &__cards {
+    margin-top: 2rem;
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
