@@ -21,12 +21,12 @@ const Transactions = () => {
   return (
     <div>
       <div className={styles.transactions}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+        <Typography variant="h5" sx={{ fontWeight: "normal", mb: 1 }}>
           Your Transactions
         </Typography>
-        <Typography variant="body1">
+        {/* <Typography variant="body1">
           View status of all the transactions made on your account
-        </Typography>
+        </Typography> */}
         <Box sx={{ display: "flex", mt: 6 }}>
           <UIInput
             type="text"
@@ -59,7 +59,7 @@ const Transactions = () => {
             onClose={() => setAnchorEl(null)}
             TransitionComponent={Fade}
           >
-            <MenuItem>Date</MenuItem>
+            <MenuItem sx={{ width: "5rem" }}>Date</MenuItem>
             <MenuItem>Status</MenuItem>
           </Menu>
         </Box>

@@ -1,0 +1,22 @@
+.profile {
+  &__section {
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "aside aside main main main";
+    background-color: #fff;
+    margin-top: 2rem;
+    padding: 2rem 2.5rem;
+    border-radius: 0.5rem;
+
+    &___main {
+      grid-area: main;
+    }
+
+    &___aside {
+      height: 19rem;
+      grid-area: aside;
+    }
+  }
+}

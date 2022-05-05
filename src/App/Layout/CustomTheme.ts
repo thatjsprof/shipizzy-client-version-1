@@ -17,10 +17,15 @@ let theme = createTheme({
     primary: {
       light: "#f2bd61",
       main: "#ffa64d",
+      dark: "#cc6600",
     },
     secondary: {
       light: "#595fe3",
       main: "#5158db",
+    },
+    success: {
+      light: "#b3e6cc",
+      main: "#39ac73",
     },
   },
   typography: {

@@ -6,7 +6,7 @@ import { makeStyles } from "@mui/styles";
 
 interface LoaderProps {
   show: boolean;
-  text: string
+  text: string;
 }
 
 const useStyles = makeStyles({
@@ -27,12 +27,11 @@ const Loader = ({ show, text }: LoaderProps) => {
 
   return (
     <Backdrop className={classes.backdrop} open={show}>
-      <h2 className="loader-font">{text}</h2>
+      <h2 className="loader-font" style={{ marginBottom: 10 }}>
+        {text}
+      </h2>
       <div className={classes.root}>
-        <CircularProgress
-          size={60}
-          thickness={4}
-        />
+        <CircularProgress size={60} thickness={4} />
       </div>
     </Backdrop>
   );
