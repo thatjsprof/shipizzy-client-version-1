@@ -1,5 +1,6 @@
 import React from "react";
 import Box from "@mui/material/Box";
+import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import SignUpForm from "../../../Components/Pages/Auth/SignUpForm.component";
 
@@ -7,45 +8,45 @@ const SignUpPage = () => {
   return (
     <Box
       sx={{
-        display: "grid",
         gap: 1,
-        gridTemplateColumns: "repeat(2, 1fr)",
+        display: "grid",
         height: "100vh",
+        gridTemplateColumns: "repeat(2, 1fr)",
       }}
     >
       <div
         style={{
-          backgroundColor: "#d99959",
           position: "relative",
+          backgroundColor: "#d99959",
         }}
       >
         <div
           style={{
-            opacity: ".1",
-            position: "absolute",
             top: "0",
             left: "0",
-            minHeight: "100%",
+            opacity: ".1",
             width: "100%",
-            backgroundImage: "url(/Images/Signup/Signup-img-3.svg)",
+            minHeight: "100%",
+            position: "absolute",
             backgroundSize: "contain",
             backgroundRepeat: "no-repeat",
+            backgroundImage: "url(/Images/Signup/Signup-img-3.svg)",
           }}
         ></div>
         <Box
           sx={{
-            color: "#fff",
-            position: "absolute",
             top: "50%",
             left: "50%",
-            transform: "translate(-50%, -50%)",
+            color: "#fff",
             minWidth: "100%",
             textAlign: "center",
+            position: "absolute",
+            transform: "translate(-50%, -50%)",
           }}
         >
           <img
-            src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/bg/bg-auth-box.svg"
             alt="Login page background"
+            src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/bg/bg-auth-box.svg"
           />
           <Typography variant="h3">Go Global with Shipizzy</Typography>
           <Typography variant="h6">
@@ -55,10 +56,10 @@ const SignUpPage = () => {
         <Typography
           variant="body2"
           sx={{
-            position: "absolute",
+            left: "50%",
             color: "#fff",
             bottom: "1rem",
-            left: "50%",
+            position: "absolute",
             transform: "translate(-50%)",
           }}
         >
@@ -69,17 +70,21 @@ const SignUpPage = () => {
         <Box
           sx={{
             mx: "auto",
-            textAlign: "center",
+            overflow: "hidden",
             margin: "30px 0px",
+            textAlign: "center",
           }}
         >
-          <img
-            src="/Images/Logo/Logo.png"
-            alt="Logo"
-            style={{ backgroundSize: "auto" }}
-          />
+          <Link to="/">
+            <img
+              alt="Logo"
+              src="/Images/Logo/Logo.png"
+              style={{ backgroundSize: "auto" }}
+            />
+          </Link>
         </Box>
         <SignUpForm />
+        <br />
       </div>
     </Box>
   );

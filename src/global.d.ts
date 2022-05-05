@@ -8,11 +8,20 @@ declare namespace auth {
     name: string;
     email: string;
     password: string;
-    confirm_password: string;
+    confirm_password?: string;
+    accountType: string;
+    businessName?: string;
+    rcNumber?: string;
+    agree?: boolean;
   }
 
   interface IForgotPassword {
     email: string;
+  }
+
+  interface IResetPassword {
+    password: string;
+    newPassword: string;
   }
 
   interface IUserInfo {
@@ -21,12 +30,17 @@ declare namespace auth {
   }
 
   type AccountType = {
-    value: "Business" | "Individual";
+    value: "business" | "individual";
     text: string;
   };
 }
 
-type LinksType = { name: string; icon: string; url: string }[];
+type LinksType = {
+  name: string;
+  icon: string;
+  active?: boolean;
+  url: string;
+}[];
 
 interface Column {
   id: string | number;

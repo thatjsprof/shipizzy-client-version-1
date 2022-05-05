@@ -1,22 +1,23 @@
 import React from "react";
-import { Link, useHistory } from "react-router-dom";
-import Divider from "@mui/material/Divider";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import Settings from "@mui/icons-material/Settings";
-import Avatar from "@mui/material/Avatar";
-import Logout from "@mui/icons-material/Logout";
+import toast from "react-hot-toast";
+import Menu from "@mui/material/Menu";
 import styles from "./Navbar.module.scss";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
+import Divider from "@mui/material/Divider";
+import MenuItem from "@mui/material/MenuItem";
+import Logout from "@mui/icons-material/Logout";
+import IconButton from "@mui/material/IconButton";
+import Settings from "@mui/icons-material/Settings";
+import { Link, useNavigate } from "react-router-dom";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import UISelect from "../../UI/Select/Select.component";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -27,17 +28,18 @@ const Navbar = () => {
   };
 
   const logout = () => {
-    history.push("/login");
+    navigate("/login");
+    toast.success("You have logged out");
   };
 
   const currencies = [
     {
-      text: "🇺🇸 USA",
-      value: "usa",
+      value: "usd",
+      text: "🇺🇸 USD",
     },
     {
+      value: "ngn",
       text: "🇺🇳 NGN",
-      value: "nigeria",
     },
   ];
 
@@ -59,24 +61,24 @@ const Navbar = () => {
             <span
               style={{
                 marginTop: ".5rem",
-                display: "inline-block",
                 marginRight: "1rem",
+                display: "inline-block",
               }}
             >
               Currency
             </span>
             <UISelect
-              options={currencies}
-              emptyValue={false}
               size="small"
-              defaultValue="usa"
+              defaultValue="usd"
+              emptyValue={false}
+              options={currencies}
               style={{ height: "0rem", width: "6.5rem" }}
             />
           </Box>
         </Box>
         <Menu
-          anchorEl={anchorEl}
           open={open}
+          anchorEl={anchorEl}
           onClose={handleClose}
           onClick={handleClose}
           PaperProps={{
@@ -130,7 +132,6 @@ const Navbar = () => {
           </MenuItem>
         </Menu>
       </div>
-      <Divider></Divider>
     </nav>
   );
 };

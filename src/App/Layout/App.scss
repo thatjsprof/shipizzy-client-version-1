@@ -1,0 +1,15 @@
+$primary-light: #f2bd61;
+$primary-main: #ffa64d;
+$secondary-light: #595fe3;
+$secondary-main: #5158db;
+$success-light: #b3e6cc;
+$success-main: #39ac73;
+
+:export {
+  primaryLight: $primary-light;
+  primaryMain: $primary-main;
+  secondaryLight: $secondary-light;
+  secondaryMain: $secondary-main;
+  successLight: $success-light;
+  successMain: $success-main;
+}

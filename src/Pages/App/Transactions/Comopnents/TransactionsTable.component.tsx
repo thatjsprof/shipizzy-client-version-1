@@ -53,6 +53,27 @@ const data: Data[] = [
     payment_mode: "Card",
     status: "Pending",
   },
+  {
+    reference: "210902-829129-212121",
+    total_amount: "₦40,400.00",
+    date: "21/02/2021",
+    payment_mode: "Card",
+    status: "Pending",
+  },
+  {
+    reference: "210902-829129-212121",
+    total_amount: "₦40,400.00",
+    date: "21/02/2021",
+    payment_mode: "Wallet",
+    status: "Approved",
+  },
+  {
+    reference: "210902-829129-212121",
+    total_amount: "₦40,400.00",
+    date: "21/02/2021",
+    payment_mode: "Card",
+    status: "Pending",
+  },
 ];
 
 const columns: Column[] = [

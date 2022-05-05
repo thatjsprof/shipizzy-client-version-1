@@ -3,6 +3,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { CardActionArea } from "@mui/material";
+import style from "./Card.module.scss";
 
 type UICardProps = PropsWithChildren<{
   title: string | JSX.Element;
@@ -12,7 +13,7 @@ type UICardProps = PropsWithChildren<{
 
 const UICard = ({ title, body, styles, children }: UICardProps) => {
   return (
-    <Card style={styles}>
+    <Card className={style.uiCard} style={styles}>
       <CardActionArea>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">

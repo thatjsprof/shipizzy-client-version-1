@@ -14,18 +14,28 @@ export const signupValidation = Yup.object().shape({
     .nullable()
     .required("Please enter your email")
     .email("Please enter a valid email"),
+  accountType: Yup.string().nullable().required("Account Type is required"),
+  businessName: Yup.string().when("accountType", {
+    is: "business",
+    then: Yup.string().required("Business Name is required"),
+  }),
+  rcNumber: Yup.string().when("accountType", {
+    is: "business",
+    then: Yup.string().required("RC Number is required"),
+  }),
   password: Yup.string()
     .nullable()
     .required("Please enter your password")
-    .min(6, "Your password must be greater than 6 characters"),
+    .min(8, "Your password must be at least 8 characters"),
   confirm_password: Yup.string()
     .nullable()
     .required("Please confirm your password.")
-    .min(6, "Your password must be greater than 6 characters")
+    .min(8, "Your password must be at least 8 characters")
     .oneOf(
       [Yup.ref("password"), null],
       "Password and confirm password must match"
     ),
+  agree: Yup.bool().isTrue("You must agree to our terms and conditions"),
 });
 
 export const forgotPasswordValidation = Yup.object().shape({
@@ -33,4 +43,9 @@ export const forgotPasswordValidation = Yup.object().shape({
     .nullable()
     .required("Please enter your email")
     .email("Please enter a valid email"),
+});
+
+export const resetPasswordValidation = Yup.object().shape({
+  password: Yup.string().nullable().required("Password is required"),
+  newPassword: Yup.string().nullable().required("New Password is reuired"),
 });

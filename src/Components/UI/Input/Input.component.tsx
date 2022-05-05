@@ -10,6 +10,7 @@ interface UIInputProps {
   error?: boolean;
   ID?: string;
   label?: string;
+  onBlur?: any;
   defaultValue?: string;
   multiline?: boolean;
   maxRows?: number;
@@ -31,6 +32,7 @@ const UIInput = ({
   ID,
   label,
   refs,
+  onBlur,
   defaultValue,
   value,
   size,
@@ -39,22 +41,24 @@ const UIInput = ({
   ...otherInputProps
 }: UIInputProps) => {
   return (
-    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+    <FormControl fullWidth>
       <TextField
         name={name}
         type={type}
         error={error}
         required={required}
         multiline={multiline}
-        maxRows={maxRows}
+        rows={maxRows}
         id={ID}
         label={label}
         inputRef={refs}
+        onBlur={onBlur}
         defaultValue={defaultValue}
         value={value}
         size={size}
         onChange={handleChange}
         style={styles}
+        sx={{ marginBottom: 3 }}
         {...otherInputProps}
       />
     </FormControl>

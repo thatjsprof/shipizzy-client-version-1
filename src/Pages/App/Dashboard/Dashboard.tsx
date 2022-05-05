@@ -1,29 +1,31 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
-import ApexCharts from "react-apexcharts";
-import UICard from "../../../Components/UI/Card/Card.component";
-import styles from "./Dashboard.module.scss";
-import theme from "../../../App/Layout/CustomTheme";
-import Typography from "@mui/material/Typography";
-import Checkbox from "@mui/material/Checkbox";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import UISelect from "../../../Components/UI/Select/Select.component";
-import IconButton from "@mui/material/IconButton";
-import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
-import Divider from "@mui/material/Divider";
-import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import Fade from "@mui/material/Fade";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Link } from "react-router-dom";
+import ApexCharts from "react-apexcharts";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import styles from "./Dashboard.module.scss";
 import AddIcon from "@mui/icons-material/Add";
+import Checkbox from "@mui/material/Checkbox";
+import MenuItem from "@mui/material/MenuItem";
+import FormGroup from "@mui/material/FormGroup";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import theme from "../../../App/Layout/CustomTheme";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import UICard from "../../../Components/UI/Card/Card.component";
+import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import UIModal from "../../../Components/UI/Modal/Modal.component";
 import UIInput from "../../../Components/UI/Input/Input.component";
 import UIButton from "../../../Components/UI/Button/Button.component";
+import UISelect from "../../../Components/UI/Select/Select.component";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 type quickActions = "Withdraw" | "Fund";
+
+const DOLLAR_RATE = 570;
 
 const Dashboard = () => {
   const series = [
@@ -59,7 +61,10 @@ const Dashboard = () => {
   };
 
   const [open, setOpen] = React.useState<boolean>(false);
-  const [openQuickActionModal, setOpenQuickActionModal] = React.useState<boolean>(false);
+  const [nairaAmount, setNairaAmount] = React.useState<number>(0);
+  const [dollarAmount, setDollarAmount] = React.useState<number>(0);
+  const [openQuickActionModal, setOpenQuickActionModal] =
+    React.useState<boolean>(false);
   const [quickAction, setQuickAction] = React.useState<string>("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const handleOpen = () => setOpen(true);
@@ -68,7 +73,7 @@ const Dashboard = () => {
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleCloseAction = (value: quickActions) => {
     setQuickAction(value);
     setOpenQuickActionModal(true);
@@ -83,17 +88,23 @@ const Dashboard = () => {
     return `${quickAction} ${quickAction === "Withdraw" ? "to" : ""} `;
   };
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+
+    setDollarAmount(Number((+value / DOLLAR_RATE).toFixed(2)));
+    setNairaAmount(+value);
+  };
+
   return (
     <div className={styles.dashboard}>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-        Welcome Back, David 🍾
+      <Typography variant="h5" sx={{ mb: 1 }}>
+        Welcome Back, David
       </Typography>
-      <Typography variant="body1">View your activities for the day</Typography>
       <Box sx={{ display: "flex" }}>
         <Typography variant="h6" sx={{ my: "2rem", flexGrow: 1 }}>
           Overview
         </Typography>
-        <Button
+        {/* <Button
           id="fade-button"
           aria-controls="fade-menu"
           aria-haspopup="true"
@@ -106,7 +117,7 @@ const Dashboard = () => {
           onClick={handleClick}
         >
           Quick Actions <KeyboardArrowDownIcon />
-        </Button>
+        </Button> */}
         <Menu
           id="fade-menu"
           MenuListProps={{
@@ -133,16 +144,20 @@ const Dashboard = () => {
           handleClose={handleCloseQuickAction}
         >
           <UIInput
-            type="text"
-            label={`Enter Amount to ${quickAction}`}
+            type="number"
             styles={{ marginBottom: "1rem" }}
+            handleChange={handleInputChange}
+            label={`Enter Amount to ${quickAction}`}
           ></UIInput>
+          <Typography sx={{ mb: "1rem", p: "0rem" }}>
+            {`$${dollarAmount} at N${DOLLAR_RATE} to $1`}
+          </Typography>
           <UIButton
             type="button"
             size="large"
             styles={{ width: "100%" }}
             variant="contained"
-            disabled
+            disabled={!nairaAmount}
           >
             {`${ExtractText()}`} your Account
           </UIButton>
@@ -151,26 +166,30 @@ const Dashboard = () => {
       <Box className={styles.dashboard__section}>
         <Box className={styles.dashboard__section___main}>
           <div className={styles.dashboard__cards}>
-            <UICard
-              styles={{
-                backgroundColor: theme.palette.primary.main,
-                color: "#fff",
-                height: "100%",
-              }}
-              title="Total Transactions Value"
-            >
-              <Typography variant="h5" sx={{ color: "#fff", fontWeight: 700 }}>
-                ₦200,000,000.00
-              </Typography>
-            </UICard>
-            <UICard title="2 Pending Fulfillments">
-              <Link to="/fulfillments">
+            <Link to="/transactions">
+              <UICard
+                styles={{
+                  backgroundColor: theme.palette.primary.main,
+                  color: "#fff",
+                }}
+                title="Total Transactions Value"
+              >
+                <Typography
+                  variant="h5"
+                  sx={{ color: "#fff", fontWeight: 700 }}
+                >
+                  ₦0.00
+                </Typography>
+              </UICard>
+            </Link>
+            <Link to="/fulfillments">
+              <UICard title="2 Pending Fulfillments">
                 <Typography variant="body2" sx={{ mt: "1rem" }}>
-                  Go to Pending Fulfillments{" "}
+                  Go to Pending Fulfillments
                   <ArrowRightAltIcon sx={{ verticalAlign: "middle" }} />
                 </Typography>
-              </Link>
-            </UICard>
+              </UICard>
+            </Link>
           </div>
           <Typography variant="h6" sx={{ mt: "3rem", flexGrow: 1 }}>
             Your Transactions Volume
@@ -185,10 +204,10 @@ const Dashboard = () => {
           </div>
         </Box>
         <Box className={styles.dashboard__section___aside}>
-          <Box sx={{ display: "flex", marginBottom: "1rem" }}>
+          {/* <Box sx={{ display: "flex", marginBottom: "1rem" }}>
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="h6">Wallet Balance</Typography>
-              <Typography variant="h3">$0.00</Typography>
+              <Typography variant="h3">₦0.00</Typography>
             </Box>
             <IconButton
               aria-label="add"
@@ -203,23 +222,27 @@ const Dashboard = () => {
               handleClose={handleClose}
             >
               <UIInput
-                type="text"
+                type="number"
                 label="Enter Amount"
                 styles={{ marginBottom: "1rem" }}
+                handleChange={handleInputChange}
               ></UIInput>
+              <Typography sx={{ mb: "1rem", p: "0rem" }}>
+                {`$${dollarAmount} at N${DOLLAR_RATE} to $1`}
+              </Typography>
               <UIButton
                 type="button"
                 size="large"
                 styles={{ width: "100%" }}
                 variant="contained"
-                disabled
+                disabled={!nairaAmount}
               >
                 Fund Wallet
               </UIButton>
             </UIModal>
           </Box>
-          <Divider />
-          <Box sx={{ marginTop: "2rem" }}>
+          <Divider /> */}
+          <Box sx={{ marginTop: "1rem" }}>
             <Typography variant="h6" sx={{ mb: "1.5rem" }}>
               Shipping Rate Calculator
             </Typography>

@@ -1,4 +1,5 @@
 import React from "react";
+import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -7,7 +8,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import styles from "./Table.module.scss"
+import styles from "./Table.module.scss";
 
 interface BaseData {
   [x: string]: any;
@@ -20,13 +21,22 @@ interface UITableProps<Data> {
   maxHeight?: number;
 }
 
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: "#f1f1f3",
+  },
+  "& td, & th": {
+    border: 0,
+  },
+}));
+
 function UITable<Data extends BaseData>({
   data,
   columns,
-  maxHeight = 400,
+  maxHeight = 500,
 }: UITableProps<Data>) {
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(8);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -48,11 +58,18 @@ function UITable<Data extends BaseData>({
   });
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden" }}>
+    <Paper
+      sx={{
+        width: "100%",
+        overflow: "hidden",
+        border: "none",
+        boxShadow: "none",
+      }}
+    >
       <TableContainer className={styles.table} sx={{ maxHeight: maxHeight }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
-            <TableRow>
+            <StyledTableRow>
               {columns.map((column) => (
                 <TableCell
                   key={column.id}
@@ -63,14 +80,19 @@ function UITable<Data extends BaseData>({
                   {column.label}
                 </TableCell>
               ))}
-            </TableRow>
+            </StyledTableRow>
           </TableHead>
           <TableBody>
             {rows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                  <StyledTableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={row.id}
+                  >
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
@@ -85,7 +107,7 @@ function UITable<Data extends BaseData>({
                         </TableCell>
                       );
                     })}
-                  </TableRow>
+                  </StyledTableRow>
                 );
               })}
           </TableBody>

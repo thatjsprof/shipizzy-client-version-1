@@ -6,6 +6,7 @@ type UIButtonProps = PropsWithChildren<{
   type: "button" | "submit";
   variant?: "text" | "contained" | "outlined";
   size?: "small" | "medium" | "large";
+  classes?: string;
   styles?: object;
   disabled?: boolean;
   startIcon?: React.ReactNode;
@@ -17,6 +18,7 @@ const UIButton = ({
   type,
   variant,
   size,
+  classes,
   styles,
   disabled = false,
   startIcon,
@@ -29,7 +31,8 @@ const UIButton = ({
       type={type}
       variant={variant}
       size={size}
-      style={styles}
+      className={classes}
+      style={Object.assign({}, styles, { boxShadow: "none" })}
       disabled={disabled}
       startIcon={startIcon}
       endIcon={endIcon}

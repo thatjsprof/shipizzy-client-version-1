@@ -1,50 +1,70 @@
 import React from "react";
 import {
-  InputLabel,
   Select,
-  FormControl,
-  SelectChangeEvent,
   MenuItem,
+  InputLabel,
+  FormControl,
+  SelectProps,
+  SelectChangeEvent,
 } from "@mui/material";
 
 interface UISelectProps {
-  options: { value: string | number; text: string }[];
-  style?: object;
-  labelID?: string;
-  ID?: string;
-  label?: string;
-  required?: boolean;
   refs?: any;
-  size?: "small" | "medium";
-  defaultValue?: string;
+  ID?: string;
+  style?: object;
+  label?: string;
+  value?: string;
+  error?: boolean;
+  labelID?: string;
+  required?: boolean;
   emptyValue?: boolean;
+  defaultValue?: string;
+  size?: SelectProps["size"];
+  endAdornment?: React.ReactNode;
+  variant?: SelectProps["variant"];
+  startAdornment?: React.ReactNode;
   handleChange?: (e: SelectChangeEvent) => void;
+  options: { value: string | number; text: string }[];
 }
 
 const UISelect = ({
-  labelID,
-  label,
   ID,
-  options,
-  required = false,
-  style,
   refs,
   size,
+  value,
+  error,
+  label,
+  style,
+  labelID,
+  options,
+  variant,
   defaultValue,
-  emptyValue = true,
   handleChange,
+  required = false,
+  emptyValue = true,
+  startAdornment = null,
+  endAdornment = null,
+  ...otherProps
 }: UISelectProps) => {
   return (
-    <FormControl sx={{ marginBottom: 2, ...style }} size={size} fullWidth>
-      <InputLabel id={ID}>{label}</InputLabel>
+    <FormControl sx={{ marginBottom: 3, ...style }} size={size} fullWidth>
+      <InputLabel id={ID} error={error}>
+        {label}
+      </InputLabel>
       <Select
-        labelId={labelID}
         id={ID}
+        error={error}
         label={label}
+        value={value}
         inputRef={refs}
-        defaultValue={defaultValue}
+        labelId={labelID}
+        variant={variant}
         required={required}
         onChange={handleChange}
+        endAdornment={endAdornment}
+        defaultValue={defaultValue}
+        startAdornment={startAdornment}
+        {...otherProps}
       >
         {emptyValue ? <MenuItem value="">None Selected</MenuItem> : []}
         {options.map(({ value, text }, index) => (

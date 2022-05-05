@@ -1,17 +1,33 @@
-import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { useState, Fragment } from "react";
+import { flowRight as compose } from "lodash";
+import { graphql } from "react-apollo";
+import {
+  LOGIN_USER,
+  LOGIN_GOOGLE_GET_URL,
+} from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
+import { Link, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import UIButton from "../../UI/Button/Button.component";
 import UIInput from "../../UI/Input/Input.component";
+import UIOutlinedInput from "../../UI/Input/OutlinedInput.component";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AuthSchema } from "../../../Schemas";
 import Loader from "../../Global/Loader/Loader.component";
+import toast from "react-hot-toast";
+import Lf from "../../../Utils/LocalForage/config";
 
-const LoginForm = () => {
+const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const history = useHistory();
+  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -30,12 +46,55 @@ const LoginForm = () => {
   const { ref: emailRef, ...emailRest } = register("email");
   const { ref: passwordRef, ...passwordRest } = register("password");
 
-  const onSubmit = (data: auth.ISignIn) => {
-    setLoading(true);
-    setTimeout(() => {
-      history.push("/dashboard");
+  const onSubmit = async (payload: auth.ISignIn) => {
+    try {
+      setLoading(true);
+      const data = await loginNewUser({
+        variables: { authDetails: payload },
+      });
+      Lf.setItem<string>("authToken", data.data.loginUser);
+      toast.success("You have Signed In");
+      navigate("/dashboard");
+    } catch (err: any) {
       setLoading(false);
-    }, 2000);
+      if (err.networkError) toast.error("There is a Server Connection Error");
+      err.graphQLErrors.map((error: any) => toast.error(error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      setGoogleLoading(true);
+      const link = await loginGoogleGetUrl();
+      window.location.replace(link.data.loginAuthGenerateUrl);
+    } catch (error: any) {
+      setGoogleLoading(false);
+      if (error.networkError) toast.error("There is a Server Connection Error");
+      error.graphQLErrors.map((error: any) => toast.error(error.message));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleShowPassword = () => {
+    setShowPassword((prevValue) => !prevValue);
+  };
+
+  const EndAdornment = () => {
+    return (
+      <InputAdornment position="end">
+        <IconButton
+          aria-label="toggle password visibility"
+          onClick={handleShowPassword}
+          onMouseDown={handleShowPassword}
+          edge="end"
+        >
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    );
   };
 
   return (
@@ -54,16 +113,23 @@ const LoginForm = () => {
             marginBottom: "1rem",
             padding: "1rem",
           }}
+          handleClick={loginWithGoogle}
         >
-          <img
-            src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/icon-google.svg"
-            alt="Login with google icon"
-            width="16px"
-            style={{
-              marginRight: "1rem",
-            }}
-          />{" "}
-          Login With Google
+          {googleLoading ? (
+            <CircularProgress size={24} />
+          ) : (
+            <Fragment>
+              <img
+                src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/icon-google.svg"
+                alt="Login with google icon"
+                width="16px"
+                style={{
+                  marginRight: "1rem",
+                }}
+              />{" "}
+              <span>Login With Google</span>
+            </Fragment>
+          )}
         </UIButton>
         <Typography
           sx={{
@@ -91,14 +157,16 @@ const LoginForm = () => {
           <span className="v-error">{errors.email.message}</span>
         )}
 
-        <UIInput
+        <UIOutlinedInput
           label="Password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           required
           error={!!errors.password}
           refs={passwordRef}
+          variant="outlined"
+          endAdornment={<EndAdornment />}
           {...passwordRest}
-        ></UIInput>
+        ></UIOutlinedInput>
 
         {errors.password && (
           <span className="v-error">{errors.password.message}</span>
@@ -108,18 +176,20 @@ const LoginForm = () => {
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="body1" sx={{ marginBottom: 2 }}>
               Don't Have an Account?
-              <Link to="/signup"> Sign Up here</Link>{" "}
+              <Link to="/signup">
+                <span style={{ color: "#d58c44" }}> Sign Up here</span>
+              </Link>
             </Typography>
           </Box>
           <Typography variant="body1">
-            <Link to="/forgot-password">Forgot your password?</Link>{" "}
+            <Link to="/forgot-password">Forgot your password?</Link>
           </Typography>
         </Box>
 
         <UIButton
-          styles={{ marginTop: "2rem", padding: "1rem" }}
           type="submit"
           variant="contained"
+          styles={{ marginTop: "2rem", padding: "1rem" }}
         >
           Sign In
         </UIButton>
@@ -128,4 +198,7 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default compose(
+  graphql(LOGIN_USER, { name: "loginNewUser" }),
+  graphql(LOGIN_GOOGLE_GET_URL, { name: "loginGoogleGetUrl" })
+)(LoginForm);
