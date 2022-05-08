@@ -4,8 +4,8 @@ import { graphql } from "react-apollo";
 import {
   LOGIN_USER,
   LOGIN_GOOGLE_GET_URL,
-  import Box from "@mui/material/Box";
 } from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
+import Box from "@mui/material/Box";
 import { Link, useNavigate } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
