@@ -48,7 +48,7 @@ const Hero = () => {
           </Typography>
           <Link to="/login">
             <UIButton
-              size="small"
+              size="large"
               type="button"
               variant="contained"
               styles={{
