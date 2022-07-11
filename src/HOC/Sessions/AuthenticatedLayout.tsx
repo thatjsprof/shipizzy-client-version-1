@@ -1,6 +1,7 @@
 import React from "react";
+import { IUserInfo } from "Interfaces/Auth";
 
-type ConditionType = (userAuth: auth.IUserInfo | null) => boolean;
+type ConditionType = (userAuth: IUserInfo | null) => boolean;
 
 const AuthenticatedLayout =
   (condition: ConditionType, message?: string) =>

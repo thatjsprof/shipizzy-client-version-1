@@ -27,7 +27,7 @@ const VerifyAccountGoogle = ({ loginAuthGetUser }: any) => {
             variables: { code },
           });
 
-          Lf.setItem<string>("authToken", data.data.loginAuthGetUser);
+          Lf.setItem<string>("authToken", data.loginAuthGetUser);
           toast.success("You have Signed In");
           navigate("/dashboard");
           setLoading(false);

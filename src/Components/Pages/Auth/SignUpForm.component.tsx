@@ -1,56 +1,47 @@
-import React, { Fragment, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { flowRight as compose } from "lodash";
-import { graphql } from "react-apollo";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import toast from "react-hot-toast";
+import { AuthSchema } from "Schemas";
+import { useForm } from "react-hook-form";
+import { ISignUp } from "Interfaces/Auth";
 import Checkbox from "@mui/material/Checkbox";
+import { AccountTypes } from "Constants/Auth";
 import FormGroup from "@mui/material/FormGroup";
+import React, { Fragment, useState } from "react";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import { Link, useNavigate } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+import Visibility from "@mui/icons-material/Visibility";
+import UIInput from "Components/UI/Input/Input.component";
+import InputAdornment from "@mui/material/InputAdornment";
+import UISelect from "Components/UI/Select/Select.component";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import CircularProgress from "@mui/material/CircularProgress";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import UIInput from "../../UI/Input/Input.component";
-import UIOutlinedInput from "../../UI/Input/OutlinedInput.component";
-import UISelect from "../../UI/Select/Select.component";
-import UIButton from "../../UI/Button/Button.component";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { AuthSchema } from "../../../Schemas";
-import Loader from "../../Global/Loader/Loader.component";
-import {
-  LOGIN_GOOGLE_GET_URL,
-  SIGN_UP_USER,
-  SIGN_UP_BUSINESS_USER,
-} from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
-import toast from "react-hot-toast";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
+import UIButton, { UILoadingButton } from "Components/UI/Button/Button.component";
 
-const AccountTypes: auth.AccountType[] = [
-  {
-    value: "individual",
-    text: "Individual Account",
-  },
-  {
-    value: "business",
-    text: "Business Account",
-  },
-];
+interface ISignUpForm {
+  loading: boolean;
+  getGoogleUrl: any;
+  googleLoading: boolean;
+  makeLoginNormalUser: any;
+  makeLoginBusinessUser: any;
+}
 
 interface AdornmentProps {
-  show: boolean;
   text: string;
+  show: boolean;
   handleShowPassword: () => void;
 }
 
 const SignUpForm = ({
+  loading,
   getGoogleUrl,
-  signUpNormalUser,
-  signUpBusinessUser,
-}: any) => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
+  googleLoading,
+  makeLoginNormalUser,
+  makeLoginBusinessUser,
+}: ISignUpForm) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
@@ -60,82 +51,73 @@ const SignUpForm = ({
     getValues,
     handleSubmit,
     formState: { errors },
-  } = useForm<auth.ISignUp>({
+  } = useForm<ISignUp>({
     mode: "onSubmit",
-    reValidateMode: "onChange",
-    resolver: yupResolver(AuthSchema.signupValidation),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      confirm_password: "",
-      accountType: "",
-      businessName: "",
       rcNumber: "",
       agree: false,
+      accountType: "",
+      businessName: "",
+      confirm_password: "",
     },
+    reValidateMode: "onChange",
+    resolver: yupResolver(AuthSchema.signupValidation),
   });
 
   const navigate = useNavigate();
 
-  const onSubmit = async (payload: auth.ISignUp) => {
-    try {
-      setLoading(true);
-      let data;
-      let output = "";
-      delete payload.confirm_password;
-      delete payload.agree;
-      if (payload.accountType === "individual") {
-        delete payload.businessName;
-        delete payload.rcNumber;
-        data = await signUpNormalUser({
-          variables: { userDetails: payload },
-        });
-        output = "addUser";
-      } else {
-        data = await signUpBusinessUser({
-          variables: { userDetails: payload },
-        });
-        output = "addUserBusiness";
-      }
-      console.log(data.data[output]);
+  const onSubmit = async (payload: ISignUp) => {
+    let data;
+    let output = "";
+    delete payload.agree;
+    delete payload.confirm_password;
+
+    if (payload.accountType === "individual") {
+      delete payload.rcNumber;
+      delete payload.businessName;
+
+      data = await makeLoginNormalUser({
+        authDetails: payload,
+      });
+
+      output = "addUser";
+    } else {
+      data = await makeLoginBusinessUser({ userDetails: payload });
+
+      output = "addUserBusiness";
+    }
+
+    console.log(data[output]);
+
+    if (data) {
       toast.success(
         "Your Account has been Created. Please verify your account."
       );
       navigate("/login");
-    } catch (err: any) {
-      setLoading(false);
-      if (err.networkError) toast.error("There is a Server Connection Error");
-      err.graphQLErrors.map((error: any) => toast.error(error.message));
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
-    try {
-      setGoogleLoading(true);
-      const link = await getGoogleUrl();
-      window.location.replace(link.data.loginAuthGenerateUrl);
-    } catch (error: any) {
-      setGoogleLoading(false);
-      if (error.networkError) toast.error("There is a Server Connection Error");
-      error.graphQLErrors.map((error: any) => toast.error(error.message));
-    } finally {
-      setGoogleLoading(false);
+    const data = await getGoogleUrl();
+
+    if (data) {
+      window.location.replace(data.loginAuthGenerateUrl);
     }
   };
 
-  const { ref: nameRef, ...nameRest } = register("name");
-  const { ref: emailRef, ...emailRest } = register("email");
-  const { ref: accountTypeRef, ...accountTypeRest } = register("accountType");
   const { ref: businessNameRef, ...businessNameRest } =
     register("businessName");
-  const { ref: rcNumberRef, ...rcNumberRest } = register("rcNumber");
-  const { ref: passwordRef, ...passwordRest } = register("password");
+  const { ref: nameRef, ...nameRest } = register("name");
+  const { ref: emailRef, ...emailRest } = register("email");
+  const { ref: agreeRef, ...agreeRest } = register("agree");
   const { ref: confirmPasswordRef, ...confirmPasswordRest } =
     register("confirm_password");
-  const { ref: agreeRef, ...agreeRest } = register("agree");
+  const { ref: rcNumberRef, ...rcNumberRest } = register("rcNumber");
+  const { ref: passwordRef, ...passwordRest } = register("password");
+  const { ref: accountTypeRef, ...accountTypeRest } = register("accountType");
 
   const handleShowPassword = () => {
     setShowPassword((prevValue) => !prevValue);
@@ -149,10 +131,10 @@ const SignUpForm = ({
     return (
       <InputAdornment position="end">
         <IconButton
+          edge="end"
           aria-label={text}
           onClick={handleShowPassword}
           onMouseDown={handleShowPassword}
-          edge="end"
         >
           {show ? <VisibilityOff /> : <Visibility />}
         </IconButton>
@@ -162,7 +144,6 @@ const SignUpForm = ({
 
   return (
     <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-      <Loader show={loading} text="Signing you up" />
       <Box sx={{ p: 2, display: "grid", width: 2 / 4, margin: "0 auto" }}>
         <Typography variant="h5" sx={{ marginBottom: 2.5 }}>
           Sign Up to create your account
@@ -172,10 +153,10 @@ const SignUpForm = ({
           type="button"
           styles={{
             width: "100%",
-            backgroundColor: "#ddd",
             color: "#000",
-            marginBottom: "1rem",
             padding: "1rem",
+            marginBottom: "1rem",
+            backgroundColor: "#ddd",
           }}
           handleClick={handleGoogleSignUp}
         >
@@ -184,12 +165,12 @@ const SignUpForm = ({
           ) : (
             <Fragment>
               <img
-                src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/icon-google.svg"
-                alt="Signup with google icon"
                 width="16px"
                 style={{
                   marginRight: "1rem",
                 }}
+                alt="Signup with google icon"
+                src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/icon-google.svg"
               />{" "}
               Sign Up With Google
             </Fragment>
@@ -200,9 +181,9 @@ const SignUpForm = ({
           sx={{
             width: "100%",
             textAlign: "center",
-            borderBottom: ".1rem solid #ddd",
             lineHeight: "0.1em",
             margin: "1rem 0 2rem",
+            borderBottom: ".1rem solid #ddd",
           }}
         >
           <span style={{ padding: "0 1rem", backgroundColor: "#f6f6f7" }}>
@@ -211,23 +192,23 @@ const SignUpForm = ({
         </Typography>
 
         <UIInput
-          label="Name"
-          type="name"
           required
-          error={!!errors.name}
-          refs={nameRef}
+          type="name"
+          label="Name"
           {...nameRest}
+          refs={nameRef}
+          error={!!errors.name}
         ></UIInput>
 
         {errors.name && <span className="v-error">{errors.name.message}</span>}
 
         <UIInput
-          label="Email"
-          type="email"
           required
-          error={!!errors.email}
-          refs={emailRef}
+          type="email"
+          label="Email"
           {...emailRest}
+          refs={emailRef}
+          error={!!errors.email}
         ></UIInput>
 
         {errors.email && (
@@ -235,14 +216,14 @@ const SignUpForm = ({
         )}
 
         <UISelect
-          label="Account Type"
-          options={AccountTypes}
-          emptyValue
           required
+          emptyValue
+          label="Account Type"
+          {...accountTypeRest}
+          refs={accountTypeRef}
+          options={AccountTypes}
           error={!!errors.accountType}
           value={watch("accountType")}
-          refs={accountTypeRef}
-          {...accountTypeRest}
         ></UISelect>
 
         {errors.accountType && (
@@ -252,12 +233,12 @@ const SignUpForm = ({
         {getValues("accountType") === "business" ? (
           <Fragment>
             <UIInput
-              label="Business Name"
-              type="text"
               required
-              error={!!errors.businessName}
-              refs={businessNameRef}
+              type="text"
+              label="Business Name"
               {...businessNameRest}
+              refs={businessNameRef}
+              error={!!errors.businessName}
             ></UIInput>
 
             {errors.businessName && (
@@ -265,12 +246,12 @@ const SignUpForm = ({
             )}
 
             <UIInput
-              label="RC Number"
-              type="text"
               required
-              error={!!errors.rcNumber}
-              refs={rcNumberRef}
+              type="text"
               {...rcNumberRest}
+              label="RC Number"
+              refs={rcNumberRef}
+              error={!!errors.rcNumber}
             ></UIInput>
 
             {errors.rcNumber && (
@@ -282,20 +263,20 @@ const SignUpForm = ({
         )}
 
         <UIOutlinedInput
-          label="Password"
-          type={showPassword ? "text" : "password"}
           required
-          error={!!errors.password}
+          label="Password"
+          {...passwordRest}
           refs={passwordRef}
           variant="outlined"
+          error={!!errors.password}
+          type={showPassword ? "text" : "password"}
           endAdornment={
             <EndAdornment
               show={showPassword}
-              handleShowPassword={handleShowPassword}
               text="Toggle Password"
+              handleShowPassword={handleShowPassword}
             />
           }
-          {...passwordRest}
         ></UIOutlinedInput>
 
         {errors.password && (
@@ -303,20 +284,20 @@ const SignUpForm = ({
         )}
 
         <UIOutlinedInput
-          label="Confirm Password"
-          type={showConfirmPassword ? "text" : "password"}
           required
-          error={!!errors.confirm_password}
-          refs={confirmPasswordRef}
           variant="outlined"
+          label="Confirm Password"
+          {...confirmPasswordRest}
+          refs={confirmPasswordRef}
+          error={!!errors.confirm_password}
+          type={showConfirmPassword ? "text" : "password"}
           endAdornment={
             <EndAdornment
               show={showConfirmPassword}
-              handleShowPassword={handleShowConfirmPassword}
               text="Toggle Confirm Password"
+              handleShowPassword={handleShowConfirmPassword}
             />
           }
-          {...confirmPasswordRest}
         ></UIOutlinedInput>
 
         {errors.confirm_password && (
@@ -327,12 +308,13 @@ const SignUpForm = ({
           <FormControlLabel
             control={
               <Checkbox
-                defaultChecked
                 disableRipple
-                inputRef={agreeRef}
+                defaultChecked
                 {...agreeRest}
+                inputRef={agreeRef}
               />
             }
+            sx={{ mb: "-.5rem" }}
             label={
               <span>
                 I agree to Shipizzy's{" "}
@@ -340,7 +322,6 @@ const SignUpForm = ({
                 <span style={{ color: "#d58c44" }}>Privacy Policy</span>
               </span>
             }
-            sx={{ mb: "-.5rem" }}
           />
 
           {errors.agree && (
@@ -370,20 +351,20 @@ const SignUpForm = ({
           </Typography>
         </Box>
 
-        <UIButton
-          styles={{ marginTop: "2rem", padding: "1rem" }}
+        <UILoadingButton
           type="submit"
+          loading={loading}
           variant="contained"
+          styles={{
+            padding: "1rem",
+            marginTop: "2rem",
+          }}
         >
           Sign Up
-        </UIButton>
+        </UILoadingButton>
       </Box>
     </form>
   );
 };
 
-export default compose(
-  graphql(LOGIN_GOOGLE_GET_URL, { name: "getGoogleUrl" }),
-  graphql(SIGN_UP_USER, { name: "signUpNormalUser" }),
-  graphql(SIGN_UP_BUSINESS_USER, { name: "signUpBusinessUser" })
-)(SignUpForm);
+export default SignUpForm;

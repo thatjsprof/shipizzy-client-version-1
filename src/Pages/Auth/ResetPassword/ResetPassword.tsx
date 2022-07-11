@@ -2,8 +2,10 @@ import toast from "react-hot-toast";
 import { graphql } from "react-apollo";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useAppSelector } from "Store/Hooks";
 import { AuthSchema } from "../../../Schemas";
 import { flowRight as compose } from "lodash";
+import { IResetPassword } from "Interfaces/Auth";
 import IconButton from "@mui/material/IconButton";
 import { Link, useLocation } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,11 +13,11 @@ import Visibility from "@mui/icons-material/Visibility";
 import InputAdornment from "@mui/material/InputAdornment";
 import { Container, Box, Typography } from "@mui/material";
 import Navbar from "../../Landing/components/Navbar/Navbar";
+import UIButton from "Components/UI/Button/Button.component";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import UIButton from "../../../Components/UI/Button/Button.component";
-import Loader from "../../../Components/Global/Loader/Loader.component";
-import UIOutlinedInput from "../../../Components/UI/Input/OutlinedInput.component";
-import { SEND_RESET_PASSWORD } from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
+import Loader from "Components/Global/Loader/Loader.component";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
+import { SEND_RESET_PASSWORD } from "Graphql/Resolvers/Users/Users.mutationdefs";
 
 interface AdornmentProps {
   show: boolean;
@@ -25,6 +27,7 @@ interface AdornmentProps {
 
 const ResetPasswordPage = ({ sendResetPassword }: any) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const { user } = useAppSelector((state) => state.user);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
@@ -33,14 +36,14 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<auth.IResetPassword>({
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-    resolver: yupResolver(AuthSchema.resetPasswordValidation),
+  } = useForm<IResetPassword>({
     defaultValues: {
       password: "",
       newPassword: "",
     },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    resolver: yupResolver(AuthSchema.resetPasswordValidation),
   });
 
   const { ref: passwordRef, ...passwordRest } = register("password");
@@ -50,7 +53,7 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
   const query = new URLSearchParams(location.search);
   const token = query.get("token");
 
-  const onSubmit = async (payload: auth.IResetPassword) => {
+  const onSubmit = async (payload: IResetPassword) => {
     if (!token) {
       toast.error("Token supplied is invalid");
     } else {
@@ -58,6 +61,8 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
         setLoading(true);
         const { data } = await sendResetPassword({
           variables: {
+            id: user.id,
+            type: "reset",
             token: token,
             password: payload.password,
             newPassword: payload.newPassword,
@@ -88,10 +93,10 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
     return (
       <InputAdornment position="end">
         <IconButton
+          edge="end"
           aria-label={text}
           onClick={handleShowPassword}
           onMouseDown={handleShowPassword}
-          edge="end"
         >
           {show ? <VisibilityOff /> : <Visibility />}
         </IconButton>
@@ -102,7 +107,6 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
   return (
     <Box>
       <Navbar />
-
       <Container maxWidth="md">
         <Box
           sx={{
@@ -141,8 +145,8 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
                   endAdornment={
                     <EndAdornment
                       show={showPassword}
-                      handleShowPassword={handleShowPassword}
                       text="Toggle Password"
+                      handleShowPassword={handleShowPassword}
                     />
                   }
                 ></UIOutlinedInput>
@@ -162,8 +166,8 @@ const ResetPasswordPage = ({ sendResetPassword }: any) => {
                   endAdornment={
                     <EndAdornment
                       show={showConfirmPassword}
-                      handleShowPassword={handleShowConfirmPassword}
                       text="Toggle Confirm Password"
+                      handleShowPassword={handleShowConfirmPassword}
                     />
                   }
                 ></UIOutlinedInput>

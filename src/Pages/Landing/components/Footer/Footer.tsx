@@ -20,13 +20,28 @@ const Footer = () => {
   return (
     <footer className={styles.footer}>
       <Container maxWidth="lg">
-        <Grid container spacing={3}>
+        <Grid
+          sx={{
+            "& .MuiListItemText-root:hover": {
+              transition: ".3s",
+              color: "primary.main",
+            },
+          }}
+          container
+          spacing={3}
+        >
           <Grid item xs={4}>
             <Link to="/">
-              <img src="/Images/Logo/Logo1.png" height="30px" alt="Logo" />
+              <img
+                alt="Logo"
+                height="30px"
+                src="/Images/Logo/Logo.png"
+                style={{ marginLeft: "-9px" }}
+              />
             </Link>
             <Typography sx={{ mt: "10px" }}>
-              Experience timely, affordable and transparent shipping
+              Experience affordable, timely and transparent shipping from
+              Nigeria to any country worldwide
             </Typography>
           </Grid>
           <Grid item xs>
@@ -101,13 +116,62 @@ const Footer = () => {
             </List>
           </Grid>
         </Grid>
-        <Box sx={{ display: "flex", pt: "3rem", pb: "2.5rem" }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <LinkedInIcon sx={{ mr: "3rem" }} />
-            <FacebookIcon sx={{ mr: "3rem" }} />
-            <TwitterIcon sx={{ mr: "3rem" }} />
-            <YouTubeIcon sx={{ mr: "3rem" }} />
-            <InstagramIcon sx={{ mr: "3rem" }} />
+        <Box sx={{ display: "flex", pt: "3rem", pb: "2rem" }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              "& .MuiSvgIcon-root": {
+                color: "#003060",
+                padding: ".5rem",
+                transition: ".4s",
+                cursor: "pointer",
+                "&:hover": {
+                  padding: ".5rem",
+                  borderRadius: "50%",
+                  transform: "rotate(30deg)",
+                  boxShadow: "0 3px 10px rgb(0 0 0 / 0.2)",
+                },
+                "&:not(:last-child)": {
+                  mr: "3rem",
+                },
+              },
+            }}
+          >
+            <LinkedInIcon
+              sx={{
+                "&:hover": {
+                  color: "#0A66C2",
+                },
+              }}
+            />
+            <FacebookIcon
+              sx={{
+                "&:hover": {
+                  color: "#1877F2",
+                },
+              }}
+            />
+            <TwitterIcon
+              sx={{
+                "&:hover": {
+                  color: "#1DA1F2",
+                },
+              }}
+            />
+            <YouTubeIcon
+              sx={{
+                "&:hover": {
+                  color: "#CD201F",
+                },
+              }}
+            />
+            <InstagramIcon
+              sx={{
+                "&:hover": {
+                  color: "#E4405F",
+                },
+              }}
+            />
           </Box>
           <Box>
             <Typography>
@@ -117,10 +181,10 @@ const Footer = () => {
                 defaultValue="ngn"
                 emptyValue={false}
                 style={{
-                  marginLeft: "10px",
-                  display: "inline",
-                  verticalAlign: "middle",
                   border: "0px",
+                  display: "inline",
+                  marginLeft: "10px",
+                  verticalAlign: "middle",
                 }}
                 options={[
                   { text: "USD", value: "usd" },

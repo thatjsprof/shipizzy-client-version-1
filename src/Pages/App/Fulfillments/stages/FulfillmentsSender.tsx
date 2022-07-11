@@ -12,12 +12,12 @@ import InputLabel from "@mui/material/InputLabel";
 import PublicIcon from "@mui/icons-material/Public";
 import FormControl from "@mui/material/FormControl";
 import ListSubheader from "@mui/material/ListSubheader";
+import UISelect from "Components/UI/Select/Select.component";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import PermPhoneMsgIcon from "@mui/icons-material/PermPhoneMsg";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import UISelect from "../../../../Components/UI/Select/Select.component";
-import UIOutlinedInput from "../../../../Components/UI/Input/OutlinedInput.component";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
 
 interface IProps {
   handleBack: () => void;

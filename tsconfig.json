@@ -1,14 +1,10 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "esnext",
-      "dom.iterable"
-    ],
     "strict": true,
     "noEmit": true,
     "allowJs": true,
+    "baseUrl": "src",
     "jsx": "react-jsx",
     "module": "esnext",
     "skipLibCheck": true,
@@ -18,9 +14,8 @@
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": false
+    "forceConsistentCasingInFileNames": false,
+    "lib": ["dom", "esnext", "dom.iterable"]
   },
-  "include": [
-    "./src/"
-  ]
+  "include": ["./src/"]
 }

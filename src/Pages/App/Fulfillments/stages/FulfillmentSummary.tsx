@@ -1,7 +1,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
+import theme from "App/Layout/CustomTheme";
 import Typography from "@mui/material/Typography";
-import theme from "../../../../App/Layout/CustomTheme";
 
 interface IProps {
   handleBack: () => void;

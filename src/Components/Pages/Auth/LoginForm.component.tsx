@@ -1,31 +1,41 @@
-import React, { useState, Fragment } from "react";
-import { flowRight as compose } from "lodash";
-import { graphql } from "react-apollo";
-import {
-  LOGIN_USER,
-  LOGIN_GOOGLE_GET_URL,
-} from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
 import Box from "@mui/material/Box";
+import toast from "react-hot-toast";
+import { ISignIn } from "Interfaces/Auth";
+import { useForm } from "react-hook-form";
+import Lf from "Utils/LocalForage/config";
+import { AuthSchema } from "../../../Schemas";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import React, { useState, Fragment } from "react";
+import { IRequestProps } from "Utils/GraphqlRequest";
 import { Link, useNavigate } from "react-router-dom";
-import CircularProgress from "@mui/material/CircularProgress";
-import InputAdornment from "@mui/material/InputAdornment";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import UIButton from "../../UI/Button/Button.component";
-import UIInput from "../../UI/Input/Input.component";
-import UIOutlinedInput from "../../UI/Input/OutlinedInput.component";
-import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { AuthSchema } from "../../../Schemas";
-import Loader from "../../Global/Loader/Loader.component";
-import toast from "react-hot-toast";
-import Lf from "../../../Utils/LocalForage/config";
+import Visibility from "@mui/icons-material/Visibility";
+import UIInput from "Components/UI/Input/Input.component";
+import InputAdornment from "@mui/material/InputAdornment";
+import CircularProgress from "@mui/material/CircularProgress";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { getCurrentAuthenticatedUser } from "Store/UserSlice";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
+import UIButton, { UILoadingButton } from "Components/UI/Button/Button.component";
 
-const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [googleLoading, setGoogleLoading] = useState<boolean>(false);
+interface ILoginForm {
+  getUser: any;
+  loginUser: any;
+  loading: boolean;
+  makeDecodeToken: any;
+  googleLoading: boolean;
+  loginGoogleGetUrl: any;
+}
+
+const LoginForm = ({
+  loading,
+  getUser,
+  loginUser,
+  googleLoading,
+  makeDecodeToken,
+  loginGoogleGetUrl,
+}: ILoginForm) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -33,48 +43,49 @@ const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<auth.ISignIn>({
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-    resolver: yupResolver(AuthSchema.loginValidation),
+  } = useForm<ISignIn>({
     defaultValues: {
       email: "",
       password: "",
     },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    resolver: yupResolver(AuthSchema.loginValidation),
   });
 
   const { ref: emailRef, ...emailRest } = register("email");
   const { ref: passwordRef, ...passwordRest } = register("password");
 
-  const onSubmit = async (payload: auth.ISignIn) => {
-    try {
-      setLoading(true);
-      const data = await loginNewUser({
-        variables: { authDetails: payload },
-      });
-      Lf.setItem<string>("authToken", data.data.loginUser);
-      toast.success("You have Signed In");
+  const decodeToken = async (token: string) => {
+    let requestOptionsDecodeToken: IRequestProps = {
+      payloadOptions: {
+        variables: { token: token },
+      },
+      requestFunction: makeDecodeToken,
+    };
+
+    await getCurrentAuthenticatedUser(getUser, requestOptionsDecodeToken);
+  };
+
+  const onSubmit = async (payload: ISignIn) => {
+    const data = await loginUser({
+      authDetails: payload,
+    });
+
+    if (data) {
+      const authToken = data.loginUser;
+      Lf.setItem<string>("authToken", authToken);
+      await decodeToken(authToken);
+      toast.success("You have logged in successfully");
       navigate("/dashboard");
-    } catch (err: any) {
-      setLoading(false);
-      if (err.networkError) toast.error("There is a Server Connection Error");
-      err.graphQLErrors.map((error: any) => toast.error(error.message));
-    } finally {
-      setLoading(false);
     }
   };
 
   const loginWithGoogle = async () => {
-    try {
-      setGoogleLoading(true);
-      const link = await loginGoogleGetUrl();
-      window.location.replace(link.data.loginAuthGenerateUrl);
-    } catch (error: any) {
-      setGoogleLoading(false);
-      if (error.networkError) toast.error("There is a Server Connection Error");
-      error.graphQLErrors.map((error: any) => toast.error(error.message));
-    } finally {
-      setGoogleLoading(false);
+    const data = await loginGoogleGetUrl();
+
+    if (data) {
+      window.location.replace(data.loginAuthGenerateUrl);
     }
   };
 
@@ -86,10 +97,10 @@ const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
     return (
       <InputAdornment position="end">
         <IconButton
-          aria-label="toggle password visibility"
+          edge="end"
           onClick={handleShowPassword}
           onMouseDown={handleShowPassword}
-          edge="end"
+          aria-label="toggle password visibility"
         >
           {showPassword ? <VisibilityOff /> : <Visibility />}
         </IconButton>
@@ -98,20 +109,25 @@ const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
   };
 
   return (
-    <form noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-      <Loader show={loading} text="Logging you in" />
+    <Box
+      noValidate
+      component="form"
+      autoComplete="off"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Box sx={{ p: 2, display: "grid", width: 2 / 4, margin: "0 auto" }}>
         <Typography variant="h5" sx={{ marginBottom: 2.5 }}>
           Welcome Back
         </Typography>
+
         <UIButton
           type="button"
           styles={{
             width: "100%",
-            backgroundColor: "#ddd",
             color: "#000",
-            marginBottom: "1rem",
             padding: "1rem",
+            marginBottom: "1rem",
+            backgroundColor: "#ddd",
           }}
           handleClick={loginWithGoogle}
         >
@@ -120,37 +136,39 @@ const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
           ) : (
             <Fragment>
               <img
-                src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/icon-google.svg"
-                alt="Login with google icon"
                 width="16px"
                 style={{
                   marginRight: "1rem",
                 }}
+                alt="Login with google icon"
+                src="https://d3bz3ebxl8svne.cloudfront.net/production/static/svg/icon-google.svg"
               />{" "}
               <span>Login With Google</span>
             </Fragment>
           )}
         </UIButton>
+
         <Typography
           sx={{
             width: "100%",
             textAlign: "center",
-            borderBottom: ".1rem solid #ddd",
             lineHeight: "0.1em",
             margin: "1rem 0 2rem",
+            borderBottom: ".1rem solid #ddd",
           }}
         >
           <span style={{ padding: "0 1rem", backgroundColor: "#f6f6f7" }}>
             Or
           </span>
         </Typography>
+
         <UIInput
-          label="Email"
-          type="email"
           required
-          error={!!errors.email}
-          refs={emailRef}
+          type="email"
+          label="Email"
           {...emailRest}
+          refs={emailRef}
+          error={!!errors.email}
         ></UIInput>
 
         {errors.email && (
@@ -158,14 +176,14 @@ const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
         )}
 
         <UIOutlinedInput
-          label="Password"
-          type={showPassword ? "text" : "password"}
           required
-          error={!!errors.password}
+          label="Password"
+          {...passwordRest}
           refs={passwordRef}
           variant="outlined"
+          error={!!errors.password}
           endAdornment={<EndAdornment />}
-          {...passwordRest}
+          type={showPassword ? "text" : "password"}
         ></UIOutlinedInput>
 
         {errors.password && (
@@ -186,19 +204,20 @@ const LoginForm = ({ loginNewUser, loginGoogleGetUrl }: any) => {
           </Typography>
         </Box>
 
-        <UIButton
+        <UILoadingButton
           type="submit"
+          loading={loading}
           variant="contained"
-          styles={{ marginTop: "2rem", padding: "1rem" }}
+          styles={{
+            padding: "1rem",
+            marginTop: "2rem",
+          }}
         >
           Sign In
-        </UIButton>
+        </UILoadingButton>
       </Box>
-    </form>
+    </Box>
   );
 };
 
-export default compose(
-  graphql(LOGIN_USER, { name: "loginNewUser" }),
-  graphql(LOGIN_GOOGLE_GET_URL, { name: "loginGoogleGetUrl" })
-)(LoginForm);
+export default LoginForm;

@@ -2,13 +2,13 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
+import theme from "App/Layout/CustomTheme";
 import Typography from "@mui/material/Typography";
 import PublicIcon from "@mui/icons-material/Public";
-import theme from "../../../../App/Layout/CustomTheme";
+import UISelect from "Components/UI/Select/Select.component";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import UISelect from "../../../../Components/UI/Select/Select.component";
-import UIOutlinedInput from "../../../../Components/UI/Input/OutlinedInput.component";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
 
 interface IProps {
   handleBack: () => void;

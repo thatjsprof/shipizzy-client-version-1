@@ -1,5 +1,5 @@
 import React from "react";
-import { AuthRoutes, LandingRoutes, AppRoutes } from "../../Services/Routes";
+import { AuthRoutes, LandingRoutes, AppRoutes } from "Services/Routes";
 const {
   TransactionsRoutes,
   FulfillmentsRoutes,
@@ -8,58 +8,59 @@ const {
   DashboardRoutes,
   SettingsRoutes,
 } = AppRoutes;
-const AppLayout = React.lazy(() => import("../../Layouts/AppLayout"));
-const LandingPage = React.lazy(() => import("../../Pages/Landing/Landing"));
-const LoginPage = React.lazy(() => import("../../Pages/Auth/Login/Login"));
+const AppLayout = React.lazy(() => import("Layouts/AppLayout"));
+const AuthGuard = React.lazy(() => import("Utils/AuthGuard"));
+const LandingPage = React.lazy(() => import("Pages/Landing/Landing"));
+const LoginPage = React.lazy(() => import("Pages/Auth/Login/Login"));
 const ForgotPasswordPage = React.lazy(
-  () => import("../../Pages/Auth/ForgotPassword/ForgotPassword")
+  () => import("Pages/Auth/ForgotPassword/ForgotPassword")
 );
 const ResetPasswordPage = React.lazy(
-  () => import("../../Pages/Auth/ResetPassword/ResetPassword")
+  () => import("Pages/Auth/ResetPassword/ResetPassword")
 );
-const SignUpPage = React.lazy(() => import("../../Pages/Auth/Signup/Signup"));
+const SignUpPage = React.lazy(() => import("Pages/Auth/Signup/Signup"));
 const VerifyPage = React.lazy(
-  () => import("../../Pages/Auth/VerifyAccount/VerifyAccount")
+  () => import("Pages/Auth/VerifyAccount/VerifyAccount")
 );
 const GoogleVerify = React.lazy(
-  () => import("../../Pages/Auth/VerifyAccount/VerifyAccountGoogle")
+  () => import("Pages/Auth/VerifyAccount/VerifyAccountGoogle")
 );
 const DashboardPage = React.lazy(
-  () => import("../../Pages/App/Dashboard/Dashboard.container")
+  () => import("Pages/App/Dashboard/Dashboard.container")
 );
 const TransactionsPage = React.lazy(
-  () => import("../../Pages/App/Transactions/Transactions.container")
+  () => import("Pages/App/Transactions/Transactions.container")
 );
-const Fulfillments = React.lazy(() => import("../../Pages/App/Fulfillments"));
+const Fulfillments = React.lazy(() => import("Pages/App/Fulfillments"));
 const FulfillmentsPage = React.lazy(
-  () => import("../../Pages/App/Fulfillments/Fulfillments.container")
+  () => import("Pages/App/Fulfillments/Fulfillments.container")
 );
 const FulfillmentsLayout = React.lazy(
-  () => import("../../Pages/App/Fulfillments/FulfillmentsLayout")
+  () => import("Pages/App/Fulfillments/FulfillmentsLayout")
 );
 const WalletPage = React.lazy(
-  () => import("../../Pages/App/Wallet/Wallet.container")
+  () => import("Pages/App/Wallet/Wallet.container")
 );
 const InvestmentsPage = React.lazy(
-  () => import("../../Pages/App/Investments/Investments.container")
+  () => import("Pages/App/Investments/Investments.container")
 );
 const SettingsLayout = React.lazy(
-  () => import("../../Pages/App/Settings/SettingsLayout")
+  () => import("Pages/App/Settings/SettingsLayout")
 );
 const SettingsPage = React.lazy(
-  () => import("../../Pages/App/Settings/Settings.container")
+  () => import("Pages/App/Settings/Settings.container")
 );
 const ProfilePage = React.lazy(
-  () => import("../../Pages/App/Settings/Profile/Profile.container")
+  () => import("Pages/App/Settings/Profile/Profile.container")
 );
 const AccountPage = React.lazy(
-  () => import("../../Pages/App/Settings/Account/Account.container")
+  () => import("Pages/App/Settings/Account/Account.container")
 );
 const GeneralPage = React.lazy(
-  () => import("../../Pages/App/Settings/General/General.container")
+  () => import("Pages/App/Settings/General/General.container")
 );
 const AddressesPage = React.lazy(
-  () => import("../../Pages/App/Settings/Addresses/Addresses.container")
+  () => import("Pages/App/Settings/Addresses/Addresses.container")
 );
 
 const routes = [
@@ -93,7 +94,12 @@ const routes = [
   },
   {
     path: "*",
-    element: <AppLayout />,
+
+    element: (
+      <AuthGuard>
+        <AppLayout />
+      </AuthGuard>
+    ),
     children: [
       {
         path: DashboardRoutes.INDEX,

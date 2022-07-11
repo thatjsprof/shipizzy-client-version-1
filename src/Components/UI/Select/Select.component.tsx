@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Select,
   MenuItem,
@@ -7,8 +6,9 @@ import {
   SelectProps,
   SelectChangeEvent,
 } from "@mui/material";
+import React from "react";
 
-interface UISelectProps {
+interface UISelectProps extends SelectProps {
   refs?: any;
   ID?: string;
   style?: object;
@@ -42,8 +42,8 @@ const UISelect = ({
   handleChange,
   required = false,
   emptyValue = true,
-  startAdornment = null,
   endAdornment = null,
+  startAdornment = null,
   ...otherProps
 }: UISelectProps) => {
   return (

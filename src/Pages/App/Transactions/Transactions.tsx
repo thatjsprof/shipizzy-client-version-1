@@ -1,15 +1,15 @@
 import React from "react";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Fade from "@mui/material/Fade";
+import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
 import styles from "./Transactions.module.scss";
-import TransactionsTable from "./Comopnents/TransactionsTable.component";
+import Typography from "@mui/material/Typography";
 import theme from "../../../App/Layout/CustomTheme";
 import UIInput from "../../../Components/UI/Input/Input.component";
+import TransactionsTable from "./Comopnents/TransactionsTable.component";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const Transactions = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -24,9 +24,6 @@ const Transactions = () => {
         <Typography variant="h5" sx={{ fontWeight: "normal", mb: 1 }}>
           Your Transactions
         </Typography>
-        {/* <Typography variant="body1">
-          View status of all the transactions made on your account
-        </Typography> */}
         <Box sx={{ display: "flex", mt: 6 }}>
           <UIInput
             type="text"
@@ -37,27 +34,27 @@ const Transactions = () => {
           <Box>
             <Button
               id="fade-button"
-              aria-controls="fade-menu"
               aria-haspopup="true"
+              onClick={handleClick}
+              aria-controls="fade-menu"
               aria-expanded={openAction ? "true" : undefined}
               sx={{
-                border: `.1rem solid ${theme.palette.primary.main}`,
                 height: "2.5rem",
+                border: `.1rem solid ${theme.palette.primary.main}`,
               }}
-              onClick={handleClick}
             >
               Filters <KeyboardArrowDownIcon />
             </Button>
           </Box>
           <Menu
             id="fade-menu"
+            open={openAction}
+            anchorEl={anchorEl}
+            TransitionComponent={Fade}
+            onClose={() => setAnchorEl(null)}
             MenuListProps={{
               "aria-labelledby": "fade-button",
             }}
-            anchorEl={anchorEl}
-            open={openAction}
-            onClose={() => setAnchorEl(null)}
-            TransitionComponent={Fade}
           >
             <MenuItem sx={{ width: "5rem" }}>Date</MenuItem>
             <MenuItem>Status</MenuItem>

@@ -1,14 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import store from "./Store/Store";
 import App from "./App/Layout/App";
+import { Provider } from "react-redux";
 import { ApolloLink } from "apollo-link";
 import { onError } from "apollo-link-error";
 import { ApolloClient } from "apollo-boost";
 import { ApolloProvider } from "react-apollo";
 import { BrowserRouter } from "react-router-dom";
 import { createHttpLink } from "apollo-link-http";
+import AuthProvider from "Providers/AuthProvider";
 import { InMemoryCache } from "apollo-cache-inmemory";
-import { resolvers, typeDefs } from "./Graphql/Resolvers/resolvers";
 
 const errorLink = onError(({ graphQLErrors, networkError }: any) => {
   if (graphQLErrors) {
@@ -20,7 +22,7 @@ const errorLink = onError(({ graphQLErrors, networkError }: any) => {
 });
 
 // "https://shipizzy-server.herokuapp.com/graphql"
-let uri = "http://localhost/graphql"
+let uri = "http://localhost/graphql";
 
 const httpLink = createHttpLink({
   uri,
@@ -33,19 +35,17 @@ const link = ApolloLink.from([errorLink, httpLink]);
 const client = new ApolloClient({
   link,
   cache,
-  typeDefs,
-  resolvers,
-});
-
-client.writeData({
-  data: {},
 });
 
 ReactDOM.render(
   <ApolloProvider client={client}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </BrowserRouter>
+    </Provider>
   </ApolloProvider>,
   document.getElementById("root")
 );

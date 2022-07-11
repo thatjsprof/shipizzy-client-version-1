@@ -1,7 +1,10 @@
 import React from "react";
 import Box from "@mui/material/Box";
+import { useAppDispatch } from "Store/Hooks";
 import Typography from "@mui/material/Typography";
-import UIButton from "../../../../Components/UI/Button/Button.component";
+import UIButton from "Components/UI/Button/Button.component";
+import { setFulfillmentOption } from "Store/FulfillmentSlice";
+import { FulfillmentOption, FulfillmentStages } from "Interfaces/Fulfillment";
 
 interface IProps {
   handleNext: () => void;
@@ -9,6 +12,17 @@ interface IProps {
 
 const FulfillmentsSelect = (props: IProps) => {
   const { handleNext } = props;
+  const dispatch = useAppDispatch();
+
+  const handleClick = (option: FulfillmentOption) => {
+    dispatch(
+      setFulfillmentOption({
+        option,
+        stage: FulfillmentStages.type,
+      })
+    );
+    handleNext();
+  };
 
   return (
     <Box>
@@ -34,7 +48,7 @@ const FulfillmentsSelect = (props: IProps) => {
               }}
               type="button"
               variant="outlined"
-              handleClick={handleNext}
+              handleClick={() => handleClick("export")}
             >
               Book an Export
             </UIButton>
@@ -48,6 +62,7 @@ const FulfillmentsSelect = (props: IProps) => {
               disabled
               type="button"
               variant="outlined"
+              handleClick={() => handleClick("import")}
             >
               Book an Import
             </UIButton>

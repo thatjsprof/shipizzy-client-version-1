@@ -7,6 +7,7 @@ import ApexCharts from "react-apexcharts";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import styles from "./Dashboard.module.scss";
+import { useAppSelector } from "Store/Hooks";
 import AddIcon from "@mui/icons-material/Add";
 import Checkbox from "@mui/material/Checkbox";
 import MenuItem from "@mui/material/MenuItem";
@@ -36,6 +37,7 @@ const Dashboard = () => {
   ];
 
   const options = {
+    colors: ["#055C9D"],
     chart: {
       toolbar: {
         show: false,
@@ -73,6 +75,7 @@ const Dashboard = () => {
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+  const { user } = useAppSelector((state) => state.user);
 
   const handleCloseAction = (value: quickActions) => {
     setQuickAction(value);
@@ -98,7 +101,7 @@ const Dashboard = () => {
   return (
     <div className={styles.dashboard}>
       <Typography variant="h5" sx={{ mb: 1 }}>
-        Welcome Back, David
+        Welcome Back, {user.firstName}
       </Typography>
       <Box sx={{ display: "flex" }}>
         <Typography variant="h6" sx={{ my: "2rem", flexGrow: 1 }}>

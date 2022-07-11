@@ -1,48 +1,73 @@
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Stack from "@mui/material/Stack";
+import React, { useState } from "react";
+import { IUser } from "Interfaces/Auth";
+import { useForm } from "react-hook-form";
+import { setUser } from "Store/UserSlice";
 import styles from "./Profile.module.scss";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
+import { useAppDispatch } from "Store/Hooks";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Visibility from "@mui/icons-material/Visibility";
-import InputAdornment from "@mui/material/InputAdornment";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import UIInput from "Components/UI/Input/Input.component";
+import UISelect from "Components/UI/Select/Select.component";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import { setDateToGmt, UppercaseTransform } from "Utils/Helpers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import UIInput from "../../../../Components/UI/Input/Input.component";
-import UIModal from "../../../../Components/UI/Modal/Modal.component";
-import UISelect from "../../../../Components/UI/Select/Select.component";
-import UIButton from "../../../../Components/UI/Button/Button.component";
-import UIOutlinedInput from "../../../../Components/UI/Input/OutlinedInput.component";
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import { UILoadingButton } from "Components/UI/Button/Button.component";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
-interface AdornmentProps {
-  show: boolean;
-  text: string;
-  handleShowPassword: () => void;
+interface IProfileProps {
+  user: IUser;
+  editUser: any;
+  loading: boolean;
+  checkPassword: any;
 }
 
-const Profile = () => {
+const Profile = ({ editUser, user, loading }: IProfileProps) => {
+  const dispatch = useAppDispatch();
+  const [activeField, setActiveField] = useState<string>("");
   const [showFields, setShowFields] = useState<{ [index: string]: boolean }>({
-    name: false,
-    email: false,
-    phone: false,
     sex: false,
-    dob: false,
+    name: false,
+    rcNumber: false,
+    dateOfBirth: false,
+    phoneNumber: false,
+    businessName: false,
   });
-  const [passwordValid, setPasswordValid] = useState<boolean>(false);
-  const [showConfirm, setShowConfirm] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const { watch, register, setValue, getValues } = useForm<IUser>({
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: {
+      sex: user.sex,
+      lastName: user.lastName,
+      rcNumber: user.rcNumber,
+      firstName: user.firstName,
+      phoneNumber: user.phoneNumber,
+      dateOfBirth: user.dateOfBirth,
+      businessName: user.businessName,
+    },
+  });
+
+  const { ref: businessNameRef, ...businessNameRest } =
+    register("businessName");
+  const { ref: sexRef, ...sexRest } = register("sex");
+  const { ref: phoneRef, ...phoneRest } = register("phoneNumber");
+  const { ref: lastNameRef, ...lastNameRest } = register("lastName");
+  const { ref: firstNameRef, ...firstNameRest } = register("firstName");
 
   const setFormState = (value: string) => {
-    if (value === "email" && !passwordValid) {
-      setShowConfirm(true);
-    } else {
-      setShowFields({ ...showFields, [value]: !showFields[value] });
-    }
+    setShowFields({ ...showFields, [value]: !showFields[value] });
+  };
+
+  const closeFormState = (value: string) => {
+    setShowFields({ ...showFields, [value]: false });
   };
 
   const breadcrumbs = [
@@ -54,38 +79,63 @@ const Profile = () => {
     </Link>,
   ];
 
-  const { name, email, phone, sex, dob } = showFields;
+  const { name, phoneNumber, sex, businessName, dateOfBirth } = showFields;
 
-  const handleShowPassword = () => {
-    setShowPassword((prevValue) => !prevValue);
-  };
+  const onSubmit = async (value: any) => {
+    setActiveField(value);
 
-  const EndAdornment = ({ show, handleShowPassword, text }: AdornmentProps) => {
-    return (
-      <InputAdornment position="end">
-        <IconButton
-          aria-label={text}
-          onClick={handleShowPassword}
-          onMouseDown={handleShowPassword}
-          edge="end"
-        >
-          {show ? <VisibilityOff /> : <Visibility />}
-        </IconButton>
-      </InputAdornment>
-    );
+    const payload: { [index: string]: any } = {
+      isVerified: user.isVerified,
+    };
+
+    if (value === "name") {
+      payload[value] = `${getValues("firstName")} ${getValues("lastName")}`;
+    } else {
+      payload[value] = getValues(value);
+    }
+
+    const data = await editUser({
+      userID: user.id,
+      userDetails: payload,
+    });
+
+    if (data) {
+      const returnedData = data.editUser;
+      const splitName = returnedData.name.split(" ");
+
+      dispatch(
+        setUser({
+          user: {
+            ...user,
+            sex: returnedData.sex,
+            lastName: splitName[1],
+            firstName: splitName[0],
+            dateOfBirth: returnedData.dateOfBirth,
+            phoneNumber: returnedData.phoneNumber,
+          },
+        })
+      );
+      closeFormState(value);
+      toast.success("Profile Updated Successfully");
+    }
   };
 
   return (
     <div>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         <Link to="/settings">
           <Box
             sx={{
-              border: ".1rem solid #ddd",
-              py: ".3rem",
               px: ".5rem",
-              borderRadius: ".5rem",
+              py: ".3rem",
               mr: "1.5rem",
+              borderRadius: ".5rem",
+              border: ".1rem solid #ddd",
             }}
           >
             <ArrowBackIosNewIcon fontSize="small" />
@@ -93,9 +143,9 @@ const Profile = () => {
         </Link>
         <Stack spacing={2}>
           <Breadcrumbs
+            aria-label="breadcrumb"
             sx={{ justifyContent: "center" }}
             separator={<NavigateNextIcon fontSize="small" />}
-            aria-label="breadcrumb"
           >
             {breadcrumbs}
           </Breadcrumbs>
@@ -109,19 +159,24 @@ const Profile = () => {
           </Typography>
           <Box
             sx={{
-              backgroundColor: "#f6f6f7",
               py: "2rem",
               px: "1rem",
               mt: "1.5rem",
               color: "#484747",
+              backgroundColor: "#f6f6f7",
             }}
           >
-            <EmojiObjectsIcon sx={{ fontSize: "2.5rem", color: "#ffa64d" }} />
+            <EmojiObjectsIcon
+              sx={{
+                color: "#ffa64d",
+                fontSize: "2.5rem",
+              }}
+            />
             <Typography variant="body2">
               Your name is assigned to all your shipments
             </Typography>
             <Typography variant="body2">
-              Your email and phone number would be used to communicate with you
+              Your email would be used to communicate with you
             </Typography>
             <Typography variant="body2">
               All other data is used for KYC purposes, personalization and
@@ -136,8 +191,8 @@ const Profile = () => {
                 Full Name
               </Typography>
               <span
-                style={{ color: "#003366", cursor: "pointer" }}
                 onClick={() => setFormState("name")}
+                style={{ color: "#003366", cursor: "pointer" }}
               >
                 {name ? "Close" : "Edit"}
               </span>
@@ -146,153 +201,232 @@ const Profile = () => {
               <Box sx={{ mt: "1rem" }}>
                 <Box
                   sx={{
-                    display: "grid",
                     gap: 2,
+                    display: "grid",
                     gridTemplateColumns: "repeat(2, 1fr)",
                   }}
                 >
-                  <UIInput type="text" label="First Name" />
-                  <UIInput type="text" label="Last Name" />
+                  <UIInput
+                    type="text"
+                    label="First Name"
+                    {...firstNameRest}
+                    refs={firstNameRef}
+                  />
+                  <UIInput
+                    type="text"
+                    label="Last Name"
+                    {...lastNameRest}
+                    refs={lastNameRef}
+                  />
                 </Box>
-                <UIButton type="button" size="large" variant="contained">
+                <UILoadingButton
+                  size="large"
+                  type="button"
+                  variant="contained"
+                  handleClick={() => onSubmit("name")}
+                  loading={loading && activeField === "name"}
+                  disabled={!watch("firstName") || !watch("lastName")}
+                >
                   Save
-                </UIButton>
+                </UILoadingButton>
               </Box>
             ) : (
-              <Typography>Ajayi David</Typography>
+              <Typography>
+                {`${user.firstName} ${user.lastName}` || "--"}
+              </Typography>
             )}
           </Box>
           <Divider />
           <Box sx={{ py: "2rem" }}>
-            <Box sx={{ display: "flex" }}>
-              <Typography sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}>
-                Email Address
-              </Typography>
-              <span
-                style={{ color: "#003366", cursor: "pointer" }}
-                onClick={() => setFormState("email")}
-              >
-                {email ? "Close" : "Edit"}
-              </span>
-            </Box>
-            {email ? (
-              <Box sx={{ mt: "1rem" }}>
-                <UIInput type="text" label="Email Address" />
-                <UIButton type="button" size="large" variant="contained">
-                  Save
-                </UIButton>
-              </Box>
-            ) : (
-              <Typography>david.ajayi.anu@gmail.com</Typography>
-            )}
+            <Typography sx={{ color: "#979797", pb: ".2rem" }}>
+              Email Address
+            </Typography>
+            <Typography>{user.email || "---"}</Typography>
           </Box>
           <Divider />
+          {user.accountType === "business" && (
+            <>
+              <Box sx={{ py: "2rem" }}>
+                <Box sx={{ display: "flex" }}>
+                  <Typography
+                    sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}
+                  >
+                    Business Name
+                  </Typography>
+                  <span
+                    onClick={() => setFormState("businessName")}
+                    style={{ color: "#003366", cursor: "pointer" }}
+                  >
+                    {businessName ? "Close" : "Edit"}
+                  </span>
+                </Box>
+                {businessName ? (
+                  <Box sx={{ mt: "1rem" }}>
+                    <UIInput
+                      type="text"
+                      label="Business Name"
+                      {...businessNameRest}
+                      refs={businessNameRef}
+                    />
+                    <UILoadingButton
+                      size="large"
+                      type="button"
+                      variant="contained"
+                      disabled={!watch("businessName")}
+                      handleClick={() => onSubmit("businessName")}
+                      loading={loading && activeField === "businessName"}
+                    >
+                      Save
+                    </UILoadingButton>
+                  </Box>
+                ) : (
+                  <Typography>{user.businessName || "---"}</Typography>
+                )}
+              </Box>
+              <Divider />
+              <Box sx={{ py: "2rem" }}>
+                <Typography sx={{ color: "#979797", pb: ".2rem" }}>
+                  RC Number
+                </Typography>
+                <Typography>{user.rcNumber || "---"}</Typography>
+              </Box>
+              <Divider />
+            </>
+          )}
           <Box sx={{ py: "2rem" }}>
             <Box sx={{ display: "flex" }}>
               <Typography sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}>
                 Phone Number
               </Typography>
               <span
+                onClick={() => setFormState("phoneNumber")}
                 style={{ color: "#003366", cursor: "pointer" }}
-                onClick={() => setFormState("phone")}
               >
-                {phone ? "Close" : "Edit"}
+                {phoneNumber ? "Close" : "Edit"}
               </span>
             </Box>
-            {phone ? (
+            {phoneNumber ? (
               <Box sx={{ mt: "1rem" }}>
-                <UIInput type="number" label="Phone Number" />
-                <UIButton type="button" size="large" variant="contained">
-                  Save
-                </UIButton>
-              </Box>
-            ) : (
-              <Typography>--</Typography>
-            )}
-          </Box>
-          <Divider />
-          <Box sx={{ py: "2rem" }}>
-            <Box sx={{ display: "flex" }}>
-              <Typography sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}>
-                Date of birth
-              </Typography>
-              <span
-                style={{ color: "#003366", cursor: "pointer" }}
-                onClick={() => setFormState("dob")}
-              >
-                {dob ? "Close" : "Edit"}
-              </span>
-            </Box>
-            {dob ? (
-              <Box sx={{ mt: "1rem" }}>
-                <UIInput type="text" label="Date of Birth" />
-                <UIButton type="button" size="large" variant="contained">
-                  Save
-                </UIButton>
-              </Box>
-            ) : (
-              <Typography>--</Typography>
-            )}
-          </Box>
-          <Divider />
-          <Box sx={{ py: "2rem" }}>
-            <Box sx={{ display: "flex" }}>
-              <Typography sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}>
-                Sex
-              </Typography>
-              <span
-                style={{ color: "#003366", cursor: "pointer" }}
-                onClick={() => setFormState("sex")}
-              >
-                {sex ? "Close" : "Edit"}
-              </span>
-            </Box>
-            {sex ? (
-              <Box sx={{ mt: "1rem" }}>
-                <UISelect
-                  label="Select your Sex"
-                  options={[
-                    { text: "Male", value: "male" },
-                    { text: "Female", value: "female" },
-                  ]}
+                <UIInput
+                  type="number"
+                  {...phoneRest}
+                  refs={phoneRef}
+                  label="Phone Number"
                 />
-                <UIButton type="button" size="large" variant="contained">
+                <UILoadingButton
+                  size="large"
+                  type="button"
+                  variant="contained"
+                  disabled={!watch("phoneNumber")}
+                  handleClick={() => onSubmit("phoneNumber")}
+                  loading={loading && activeField === "phoneNumber"}
+                >
                   Save
-                </UIButton>
+                </UILoadingButton>
               </Box>
             ) : (
-              <Typography>--</Typography>
+              <Typography>{user.phoneNumber || "--"}</Typography>
             )}
           </Box>
+          {user.accountType === "individual" && (
+            <>
+              <Divider />
+              <Box sx={{ py: "2rem" }}>
+                <Box sx={{ display: "flex" }}>
+                  <Typography
+                    sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}
+                  >
+                    Date of birth
+                  </Typography>
+                  <span
+                    onClick={() => setFormState("dateOfBirth")}
+                    style={{ color: "#003366", cursor: "pointer" }}
+                  >
+                    {dateOfBirth ? "Close" : "Edit"}
+                  </span>
+                </Box>
+                {dateOfBirth ? (
+                  <Box sx={{ mt: "1rem" }}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <MobileDatePicker
+                        maxDate={new Date()}
+                        label="Date of Birth"
+                        value={watch("dateOfBirth")}
+                        onChange={(newValue) => {
+                          setValue("dateOfBirth", newValue);
+                        }}
+                        renderInput={(params) => {
+                          return <UIInput type="text" {...params} />;
+                        }}
+                      />
+                    </LocalizationProvider>
+                    <UILoadingButton
+                      size="large"
+                      type="button"
+                      variant="contained"
+                      disabled={!watch("dateOfBirth")}
+                      handleClick={() => onSubmit("dateOfBirth")}
+                      loading={loading && activeField === "dateOfBirth"}
+                    >
+                      Save
+                    </UILoadingButton>
+                  </Box>
+                ) : (
+                  <Typography>
+                    {setDateToGmt(user.dateOfBirth as string) || "--"}
+                  </Typography>
+                )}
+              </Box>
+              <Divider />
+              <Box sx={{ py: "2rem" }}>
+                <Box sx={{ display: "flex" }}>
+                  <Typography
+                    sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}
+                  >
+                    Sex
+                  </Typography>
+                  <span
+                    onClick={() => setFormState("sex")}
+                    style={{ color: "#003366", cursor: "pointer" }}
+                  >
+                    {sex ? "Close" : "Edit"}
+                  </span>
+                </Box>
+                {sex ? (
+                  <Box sx={{ mt: "1rem" }}>
+                    <UISelect
+                      emptyValue
+                      {...sexRest}
+                      refs={sexRef}
+                      label="Select your Sex"
+                      disabled={!watch("sex")}
+                      value={watch("sex") as string}
+                      options={[
+                        { text: "Male", value: "male" },
+                        { text: "Female", value: "female" },
+                        { text: "Trans", value: "trans" },
+                      ]}
+                    />
+                    <UILoadingButton
+                      size="large"
+                      type="button"
+                      variant="contained"
+                      handleClick={() => onSubmit("sex")}
+                      loading={loading && activeField === "sex"}
+                    >
+                      Save
+                    </UILoadingButton>
+                  </Box>
+                ) : (
+                  <Typography>
+                    {UppercaseTransform(user.sex as string) || "--"}
+                  </Typography>
+                )}
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
-      <UIModal
-        title="Kindly confirm your Password to proceed"
-        open={showConfirm}
-        handleClose={() => setShowConfirm(false)}
-      >
-        <UIOutlinedInput
-          label="Enter your Password"
-          type={showPassword ? "text" : "password"}
-          variant="outlined"
-          endAdornment={
-            <EndAdornment
-              show={showPassword}
-              handleShowPassword={handleShowPassword}
-              text="Toggle Password"
-            />
-          }
-        ></UIOutlinedInput>
-        <UIButton
-          variant="contained"
-          styles={{ width: "100%", marginTop: "1rem", padding: "1rem" }}
-          size="large"
-          type="button"
-          disabled
-        >
-          Confirm your password
-        </UIButton>
-      </UIModal>
     </div>
   );
 };

@@ -2,46 +2,16 @@ import React from "react";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/styles";
 import Button from "@mui/material/Button";
+import theme from "App/Layout/CustomTheme";
+import { formatToNGN } from "Utils/Helpers";
 import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
-import theme from "../../../../App/Layout/CustomTheme";
-import { formatToNGN } from "../../../../Utils/Helpers";
+import { shippingData, insuranceData } from "Constants/Fulfillment";
 
 interface IProps {
   handleBack: () => void;
   handleNext: () => void;
 }
-
-const shippingData = [
-  {
-    name: "Express Shipping",
-    label: "express",
-    description: "Delivery in 3 - 5 days",
-    price: "14211",
-  },
-  {
-    name: "Basic Shipping (Cargo)",
-    label: "basic",
-    description: "Delivery in 7 - 14 days",
-    price: "3000",
-    note: "Please note that shipments below 30,000 would not apply",
-  },
-];
-
-const insuranceData = [
-  {
-    name: "Basic Insurance",
-    label: "basic",
-    description: "Covers damage up to N5,000",
-    price: "Free",
-  },
-  {
-    name: "Premium Insurance",
-    label: "premium",
-    description: "Covers damage up to N50,000",
-    price: "3000",
-  },
-];
 
 const FulfillmentShippingType = (props: IProps) => {
   const [shippingTypes] = React.useState(shippingData);

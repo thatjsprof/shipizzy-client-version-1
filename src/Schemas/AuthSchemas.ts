@@ -8,6 +8,8 @@ export const loginValidation = Yup.object().shape({
   password: Yup.string().nullable().required("Please enter your password"),
 });
 
+export const editUserValidation = Yup.object().shape({});
+
 export const signupValidation = Yup.object().shape({
   name: Yup.string().nullable().required("Please enter your name"),
   email: Yup.string()
@@ -48,4 +50,20 @@ export const forgotPasswordValidation = Yup.object().shape({
 export const resetPasswordValidation = Yup.object().shape({
   password: Yup.string().nullable().required("Password is required"),
   newPassword: Yup.string().nullable().required("New Password is reuired"),
+});
+
+export const changePasswordValidation = Yup.object().shape({
+  password: Yup.string().nullable().required("Please enter your password"),
+  newPassword: Yup.string()
+    .nullable()
+    .required("Please enter new password")
+    .min(8, "Your password must be at least 8 characters"),
+  confirmPassword: Yup.string()
+    .nullable()
+    .required("Please confirm your new password.")
+    .min(8, "Your password must be at least 8 characters")
+    .oneOf(
+      [Yup.ref("password"), null],
+      "Password and confirm password must match"
+    ),
 });

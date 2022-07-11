@@ -1,12 +1,16 @@
-import * as React from "react";
+import {
+  FulfillmentStages,
+  FulfillmentStagesReverse,
+} from "Interfaces/Fulfillment";
 import Box from "@mui/material/Box";
 import Step from "@mui/material/Step";
 import { Link } from "react-router-dom";
 import Stack from "@mui/material/Stack";
+import React, { useEffect } from "react";
 import Button from "@mui/material/Button";
 import Stepper from "@mui/material/Stepper";
+import { useAppSelector } from "Store/Hooks";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import FulfillmentsType from "./stages/FulfillmentsType";
 import FulfillmentsSelect from "./stages/FulfillmentsSelect";
 import FulfillmentsSender from "./stages/FulfillmentsSender";
 import FulfillmentSummary from "./stages/FulfillmentSummary";
@@ -16,9 +20,11 @@ import FulfillmentsReceiver from "./stages/FulfillmentsReceiver";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import FulfillmentShippingType from "./stages/FulfillmentShippingType";
 import FulfillmentsItemDescription from "./stages/FulfillmentItemDescription";
+import FulfillmentsTypeContainer from "./stages/FulfillmentType/FulfillmentTypeContainer";
 
 export default function FulfillmentApplication() {
   const [activeStep, setActiveStep] = React.useState(1);
+  const { stage } = useAppSelector((state) => state.fulfillment);
 
   const Breadcrumb = ({
     index,
@@ -79,7 +85,10 @@ export default function FulfillmentApplication() {
   const pages = [
     "",
     <FulfillmentsSelect handleNext={handleNext} />,
-    <FulfillmentsType handleBack={handleBack} handleNext={handleNext} />,
+    <FulfillmentsTypeContainer
+      handleBack={handleBack}
+      handleNext={handleNext}
+    />,
     <FulfillmentsSender handleBack={handleBack} handleNext={handleNext} />,
     <FulfillmentsReceiver handleBack={handleBack} handleNext={handleNext} />,
     <FulfillmentsItemDescription
@@ -89,6 +98,10 @@ export default function FulfillmentApplication() {
     <FulfillmentShippingType handleBack={handleBack} handleNext={handleNext} />,
     <FulfillmentSummary handleBack={handleBack} handleNext={handleNext} />,
   ];
+
+  useEffect(() => {
+    setActiveStep(FulfillmentStagesReverse[stage as FulfillmentStages] || 1);
+  }, [stage]);
 
   return (
     <Box sx={{ width: "100%", marginBottom: "50px" }}>
@@ -102,8 +115,8 @@ export default function FulfillmentApplication() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
+              flexDirection: "column",
               justifyContent: "center",
             }}
           >
@@ -123,11 +136,11 @@ export default function FulfillmentApplication() {
               <Link to="/fulfillments">
                 <Box
                   sx={{
-                    border: ".1rem solid #ddd",
                     py: ".3rem",
                     px: ".5rem",
-                    borderRadius: ".5rem",
                     mr: "1.5rem",
+                    borderRadius: ".5rem",
+                    border: ".1rem solid #ddd",
                   }}
                 >
                   <ArrowBackIosNewIcon fontSize="small" />

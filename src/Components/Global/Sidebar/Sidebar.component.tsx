@@ -1,6 +1,8 @@
 import List from "@mui/material/List";
 import React, { useState } from "react";
 import styles from "./Sidebar.module.scss";
+import theme from "App/Layout/CustomTheme";
+import { styled } from "@mui/material/styles";
 import Collapse from "@mui/material/Collapse";
 import HomeIcon from "@mui/icons-material/Home";
 import Typography from "@mui/material/Typography";
@@ -24,24 +26,24 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 const NormalLinks: LinksType = [
   { icon: "DashboardIcon", name: "Dashboard", active: true, url: "/dashboard" },
   {
-    icon: "AccountBalanceWalletIcon",
-    name: "Wallet",
     active: false,
+    name: "Wallet",
     url: "/wallet",
+    icon: "AccountBalanceWalletIcon",
   },
   {
+    active: false,
     icon: "SavingsIcon",
     name: "Investments",
-    active: false,
     url: "/investments",
   },
 ];
 
 const ExportLinks: LinksType = [
   {
-    icon: "ShoppingBasketIcon",
-    name: "Your Fulfillments",
     url: "/fulfillments",
+    name: "Your Fulfillments",
+    icon: "ShoppingBasketIcon",
   },
   { icon: "ReceiptIcon", name: "Transactions", url: "/transactions" },
 ];
@@ -53,15 +55,23 @@ const ExportLinks: LinksType = [
 // ];
 
 const IconsArray: { [x: string]: any } = {
-  DashboardIcon,
-  AccountBalanceWalletIcon,
-  SavingsIcon,
-  ShoppingBasketIcon,
-  ReceiptIcon,
-  AccountBoxIcon,
   HomeIcon,
+  ReceiptIcon,
+  SavingsIcon,
   SettingsIcon,
+  DashboardIcon,
+  AccountBoxIcon,
+  ShoppingBasketIcon,
+  AccountBalanceWalletIcon,
 };
+
+const CustomButtonStyled = styled(ListItemButton)(() => ({
+  "&.Mui-selected": {
+    borderStyle: "solid",
+    borderWidth: "0px 4px 0px 0px",
+    borderColor: theme.palette.primary.main,
+  },
+}));
 
 const Sidebar = () => {
   const location = useLocation();
@@ -84,17 +94,17 @@ const Sidebar = () => {
           const Icon = IconsArray[icon];
           return (
             <Link key={index} to={active ? url : "#"}>
-              <ListItemButton
+              <CustomButtonStyled
                 disabled={!active}
-                sx={{ mb: ".5rem", color: "#424a57" }}
                 selected={selectedRoute === url}
+                sx={{ mb: ".5rem", color: "#424a57" }}
                 onClick={() => setSelectedRoute(url)}
               >
                 <ListItemIcon>
                   <Icon />
                 </ListItemIcon>
                 <ListItemText primary={name} />
-              </ListItemButton>
+              </CustomButtonStyled>
             </Link>
           );
         })}
@@ -112,9 +122,10 @@ const Sidebar = () => {
         >
           {ExportLinks.map(({ icon, name, url }, index) => {
             const Icon = IconsArray[icon];
+
             return (
               <Link key={index} to={url}>
-                <ListItemButton
+                <CustomButtonStyled
                   sx={{ mb: ".5rem", color: "#424a57" }}
                   selected={selectedRoute.includes(url)}
                   onClick={() => setSelectedRoute(url)}
@@ -123,7 +134,7 @@ const Sidebar = () => {
                     <Icon />
                   </ListItemIcon>
                   <ListItemText primary={name} />
-                </ListItemButton>
+                </CustomButtonStyled>
               </Link>
             );
           })}
@@ -158,7 +169,7 @@ const Sidebar = () => {
           }
         >
           <Link to="/settings">
-            <ListItemButton
+            <CustomButtonStyled
               sx={{ mb: ".5rem", color: "#424a57" }}
               selected={selectedRoute.includes("/settings")}
               onClick={() => setSelectedRoute("/settings")}
@@ -167,7 +178,7 @@ const Sidebar = () => {
                 <SettingsIcon />
               </ListItemIcon>
               <ListItemText primary="General" />
-            </ListItemButton>
+            </CustomButtonStyled>
           </Link>
           {/* {SettingsLinks.map(({ icon, name, url }, index) => {
             const Icon = IconsArray[icon];

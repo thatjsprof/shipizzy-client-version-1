@@ -2,10 +2,10 @@ export const SETTINGS = {
   /**
    * @category Settings
    */
+  HELP: `help`,
   INDEX: `settings`,
   PROFILE: `profile`,
   ACCOUNT: `account`,
-  HELP: `help`,
   GENERAL: `general`,
   ADDRESSES: `addresses`,
 };

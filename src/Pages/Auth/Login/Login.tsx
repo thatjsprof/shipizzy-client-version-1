@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
-import LoginForm from "../../../Components/Pages/Auth/LoginForm.component";
+import LoginFormContainer from "../../../Components/Pages/Auth/LoginForm.container";
 
 const LoginPage = () => {
   return (
@@ -69,7 +69,7 @@ const LoginPage = () => {
             />
           </Link>
         </Box>
-        <LoginForm />
+        <LoginFormContainer />
       </div>
     </Box>
   );

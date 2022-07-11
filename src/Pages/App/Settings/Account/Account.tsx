@@ -1,25 +1,27 @@
+import Box from "@mui/material/Box";
+import { AuthSchema } from "Schemas";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Box from "@mui/material/Box";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-// import Divider from "@mui/material/Divider";
+import { useForm } from "react-hook-form";
+import styles from "./Account.module.scss";
+import { useAppSelector } from "Store/Hooks";
+import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import { yupResolver } from "@hookform/resolvers/yup";
 import Visibility from "@mui/icons-material/Visibility";
+import InputAdornment from "@mui/material/InputAdornment";
+import UIButton from "Components/UI/Button/Button.component";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
-import styles from "./Account.module.scss";
-// import UIInput from "../../../../Components/UI/Input/Input.component";
-import UIButton from "../../../../Components/UI/Button/Button.component";
-import UIOutlinedInput from "../../../../Components/UI/Input/OutlinedInput.component";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
 
 interface AdornmentProps {
-  show: boolean;
   text: string;
+  show: boolean;
   handleShowPassword: () => void;
 }
 
@@ -27,6 +29,7 @@ const Account = () => {
   const [showFields, setShowFields] = useState<{ [index: string]: boolean }>({
     password: false,
   });
+  const { user } = useAppSelector((state) => state.user);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -45,6 +48,21 @@ const Account = () => {
     </Link>,
   ];
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<any>({
+    mode: "onBlur",
+    defaultValues: {
+      password: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+    reValidateMode: "onBlur",
+    resolver: yupResolver(AuthSchema.changePasswordValidation),
+  });
+
   const { password } = showFields;
 
   const handleShowPassword = () => {
@@ -59,14 +77,18 @@ const Account = () => {
     setShowConfirmPassword((prevValue) => !prevValue);
   };
 
+  const onSubmit = async (payload: any) => {
+    //
+  };
+
   const EndAdornment = ({ show, handleShowPassword, text }: AdornmentProps) => {
     return (
       <InputAdornment position="end">
         <IconButton
+          edge="end"
           aria-label={text}
           onClick={handleShowPassword}
           onMouseDown={handleShowPassword}
-          edge="end"
         >
           {show ? <VisibilityOff /> : <Visibility />}
         </IconButton>
@@ -74,17 +96,22 @@ const Account = () => {
     );
   };
 
+  const { ref: passwordRef, ...passwordRest } = register("password");
+  const { ref: newPasswordRef, ...newPasswordRest } = register("newPassword");
+  const { ref: confirmPasswordRef, ...confirmPasswordRest } =
+    register("confirmPassword");
+
   return (
     <div>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Link to="/settings">
           <Box
             sx={{
-              border: ".1rem solid #ddd",
               py: ".3rem",
               px: ".5rem",
-              borderRadius: ".5rem",
               mr: "1.5rem",
+              borderRadius: ".5rem",
+              border: ".1rem solid #ddd",
             }}
           >
             <ArrowBackIosNewIcon fontSize="small" />
@@ -103,19 +130,29 @@ const Account = () => {
       <Box className={styles.account__section}>
         <Box className={styles.account__section___aside}>
           <Typography variant="h5">Personal Information</Typography>
-          <Typography sx={{ color: "#979797", mt: ".5rem" }}>
+          <Typography
+            sx={{
+              mt: ".5rem",
+              color: "#979797",
+            }}
+          >
             Edit your Account settings or update your password
           </Typography>
           <Box
             sx={{
-              backgroundColor: "#f6f6f7",
               py: "2rem",
               px: "1rem",
               mt: "1.5rem",
               color: "#484747",
+              backgroundColor: "#f6f6f7",
             }}
           >
-            <EmojiObjectsIcon sx={{ fontSize: "2.5rem", color: "#ffa64d" }} />
+            <EmojiObjectsIcon
+              sx={{
+                color: "#ffa64d",
+                fontSize: "2.5rem",
+              }}
+            />
             <Typography variant="body2">
               Your email and password grant you access to your account
             </Typography>
@@ -127,55 +164,89 @@ const Account = () => {
         <Box className={styles.account__section___main}>
           <Box sx={{ pb: "2rem" }}>
             <Box sx={{ display: "flex" }}>
-              <Typography sx={{ flexGrow: 1, color: "#979797", pb: ".2rem" }}>
+              <Typography
+                sx={{
+                  pb: ".2rem",
+                  flexGrow: 1,
+                  color: "#979797",
+                }}
+              >
                 Password Reset
               </Typography>
               <span
-                style={{ color: "#003366", cursor: "pointer" }}
+                style={{
+                  color: "#003366",
+                  cursor: "pointer",
+                }}
                 onClick={() => setFormState("password")}
               >
                 {password ? "Close" : "Edit"}
               </span>
             </Box>
             {password ? (
-              <Box sx={{ mt: "1rem" }}>
+              <Box
+                noValidate
+                component="form"
+                sx={{ mt: "1rem" }}
+                onSubmit={handleSubmit(onSubmit)}
+              >
                 <UIOutlinedInput
-                  label="Old Password"
-                  type={showPassword ? "text" : "password"}
+                  {...passwordRest}
                   variant="outlined"
+                  refs={passwordRef}
+                  label="Old Password"
+                  error={!!errors.password}
+                  type={showPassword ? "text" : "password"}
                   endAdornment={
                     <EndAdornment
                       show={showPassword}
-                      handleShowPassword={handleShowPassword}
                       text="Toggle Password"
+                      handleShowPassword={handleShowPassword}
                     />
                   }
                 ></UIOutlinedInput>
+                {errors.password && (
+                  <span className="v-error">{errors.password.message}</span>
+                )}
                 <UIOutlinedInput
-                  label="New Password"
-                  type={showNewPassword ? "text" : "password"}
                   variant="outlined"
+                  {...newPasswordRest}
+                  label="New Password"
+                  refs={newPasswordRef}
+                  error={!!errors.newPassword}
+                  type={showNewPassword ? "text" : "password"}
                   endAdornment={
                     <EndAdornment
                       show={showNewPassword}
-                      handleShowPassword={handleShowNewPassword}
                       text="Toggle Password"
+                      handleShowPassword={handleShowNewPassword}
                     />
                   }
                 ></UIOutlinedInput>
+                {errors.newPassword && (
+                  <span className="v-error">{errors.newPassword.message}</span>
+                )}
                 <UIOutlinedInput
-                  label="Confirm Password"
-                  type={showConfirmPassword ? "text" : "password"}
                   variant="outlined"
+                  {...confirmPasswordRest}
+                  label="Confirm Password"
+                  refs={confirmPasswordRef}
+                  error={!!errors.confirmPassword}
+                  type={showConfirmPassword ? "text" : "password"}
                   endAdornment={
                     <EndAdornment
+                      text="Toggle Password"
                       show={showConfirmPassword}
                       handleShowPassword={handleShowConfirmPassword}
-                      text="Toggle Password"
                     />
                   }
                 ></UIOutlinedInput>
-                <UIButton type="button" size="large" variant="contained">
+                {errors.confirmPassword && (
+                  <span className="v-error">
+                    {errors.confirmPassword.message}
+                  </span>
+                )}
+                <UIButton size="large" type="submit" variant="contained">
                   Save
                 </UIButton>
               </Box>
