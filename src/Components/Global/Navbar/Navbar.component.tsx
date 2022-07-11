@@ -4,8 +4,10 @@ import toast from "react-hot-toast";
 import Menu from "@mui/material/Menu";
 import styles from "./Navbar.module.scss";
 import Avatar from "@mui/material/Avatar";
+import Lf from "Utils/LocalForage/config";
 import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
+import { LogoutUser } from "Store/UserSlice";
 import MenuItem from "@mui/material/MenuItem";
 import Logout from "@mui/icons-material/Logout";
 import IconButton from "@mui/material/IconButton";
@@ -27,8 +29,10 @@ const Navbar = () => {
     setAnchorEl(null);
   };
 
-  const logout = () => {
+  const logout = async () => {
     navigate("/login");
+    Lf.removeItem("authToken");
+    await LogoutUser();
     toast.success("You have logged out");
   };
 

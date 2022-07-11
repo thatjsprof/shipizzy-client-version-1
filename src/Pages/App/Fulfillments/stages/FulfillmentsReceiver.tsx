@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
+import theme from "App/Layout/CustomTheme";
 import MenuItem from "@mui/material/MenuItem";
 import CheckBox from "@mui/material/Checkbox";
 import MapIcon from "@mui/icons-material/Map";
@@ -11,14 +12,13 @@ import Typography from "@mui/material/Typography";
 import InputLabel from "@mui/material/InputLabel";
 import PublicIcon from "@mui/icons-material/Public";
 import FormControl from "@mui/material/FormControl";
-import theme from "../../../../App/Layout/CustomTheme";
 import ListSubheader from "@mui/material/ListSubheader";
+import UISelect from "Components/UI/Select/Select.component";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import PermPhoneMsgIcon from "@mui/icons-material/PermPhoneMsg";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import UISelect from "../../../../Components/UI/Select/Select.component";
-import UIOutlinedInput from "../../../../Components/UI/Input/OutlinedInput.component";
+import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
 
 interface IProps {
   handleBack: () => void;

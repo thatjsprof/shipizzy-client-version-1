@@ -1,14 +1,14 @@
 import React from "react";
-import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
+import styles from "./Table.module.scss";
+import { styled } from "@mui/material/styles";
+import TableRow from "@mui/material/TableRow";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
+import TableContainer from "@mui/material/TableContainer";
 import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import styles from "./Table.module.scss";
 
 interface BaseData {
   [x: string]: any;
@@ -17,8 +17,8 @@ interface BaseData {
 
 interface UITableProps<Data> {
   data: Data[];
-  columns: readonly Column[];
   maxHeight?: number;
+  columns: readonly Column[];
 }
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -61,9 +61,9 @@ function UITable<Data extends BaseData>({
     <Paper
       sx={{
         width: "100%",
-        overflow: "hidden",
         border: "none",
         boxShadow: "none",
+        overflow: "hidden",
       }}
     >
       <TableContainer className={styles.table} sx={{ maxHeight: maxHeight }}>
@@ -89,9 +89,9 @@ function UITable<Data extends BaseData>({
                 return (
                   <StyledTableRow
                     hover
-                    role="checkbox"
-                    tabIndex={-1}
                     key={row.id}
+                    tabIndex={-1}
+                    role="checkbox"
                   >
                     {columns.map((column) => {
                       const value = row[column.id];
@@ -114,12 +114,12 @@ function UITable<Data extends BaseData>({
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
+        page={page}
         component="div"
         count={rows.length}
         rowsPerPage={rowsPerPage}
-        page={page}
         onPageChange={handleChangePage}
+        rowsPerPageOptions={[10, 25, 100]}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Paper>

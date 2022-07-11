@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { AuthSchema } from "../../../Schemas";
 import { flowRight as compose } from "lodash";
+import { IForgotPassword } from "Interfaces/Auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Container, Box, Typography } from "@mui/material";
 import Navbar from "../../Landing/components/Navbar/Navbar";
@@ -20,7 +21,7 @@ const ForgotPasswordPage = ({ sendResetToken }: any) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<auth.IForgotPassword>({
+  } = useForm<IForgotPassword>({
     mode: "onSubmit",
     reValidateMode: "onChange",
     resolver: yupResolver(AuthSchema.forgotPasswordValidation),
@@ -31,7 +32,7 @@ const ForgotPasswordPage = ({ sendResetToken }: any) => {
 
   const { ref: emailRef, ...emailRest } = register("email");
 
-  const onSubmit = async (payload: auth.IForgotPassword) => {
+  const onSubmit = async (payload: IForgotPassword) => {
     try {
       setLoading(true);
       const { data } = await sendResetToken({

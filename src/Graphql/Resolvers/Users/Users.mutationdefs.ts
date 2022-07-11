@@ -44,9 +44,9 @@ export const DECODE_TOKEN = gql`
   mutation VerifyToken($token: String!) {
     verifyToken(token: $token) {
       id
-      email
       iat
       exp
+      email
     }
   }
 `;
@@ -80,7 +80,41 @@ export const SEND_RESET_PASSWORD = gql`
 export const GET_USER = gql`
   mutation GetUser($userID: String!) {
     getUser(userID: $userID) {
+      _id
+      sex
+      name
       email
+      address
+      rcNumber
+      password
+      createdOn
+      modifiedOn
+      isVerified
+      accountType
+      dateOfBirth
+      phoneNumber
+      businessName
+    }
+  }
+`;
+
+export const EDIT_USER = gql`
+  mutation EditUser($userID: String!, $userDetails: UserDetails) {
+    editUser(userID: $userID, userDetails: $userDetails) {
+      _id
+      sex
+      name
+      email
+      address
+      rcNumber
+      password
+      createdOn
+      modifiedOn
+      isVerified
+      accountType
+      phoneNumber
+      dateOfBirth
+      businessName
     }
   }
 `;

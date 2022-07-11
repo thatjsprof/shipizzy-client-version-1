@@ -1,65 +1,68 @@
 import React from "react";
+import { Modify } from "Utils/Helpers";
 import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
+import TextField, { TextFieldProps } from "@mui/material/TextField";
 
 interface UIInputProps {
-  type: string;
-  required?: boolean;
-  name?: string;
   refs?: any;
-  error?: boolean;
   ID?: string;
-  label?: string;
   onBlur?: any;
-  defaultValue?: string;
-  multiline?: boolean;
-  maxRows?: number;
+  type: string;
+  name?: string;
+  label?: string;
   value?: string;
+  error?: boolean;
   styles?: object;
+  maxRows?: number;
+  required?: boolean;
+  multiline?: boolean;
+  defaultValue?: string;
   size?: "small" | "medium";
   handleChange?: React.ChangeEventHandler<
     HTMLInputElement | HTMLTextAreaElement
   >;
 }
 
+export type CustomTextFieldProps = Modify<UIInputProps, TextFieldProps>;
+
 const UIInput = ({
+  ID,
   name,
   type,
+  refs,
+  size,
+  label,
+  value,
+  onBlur,
+  styles,
+  maxRows = 0,
+  defaultValue,
+  handleChange,
   error = false,
   required = false,
   multiline = false,
-  maxRows = 0,
-  ID,
-  label,
-  refs,
-  onBlur,
-  defaultValue,
-  value,
-  size,
-  styles,
-  handleChange,
   ...otherInputProps
-}: UIInputProps) => {
+}: CustomTextFieldProps) => {
   return (
     <FormControl fullWidth>
       <TextField
+        id={ID}
         name={name}
+        size={size}
         type={type}
         error={error}
-        required={required}
-        multiline={multiline}
-        rows={maxRows}
-        id={ID}
         label={label}
+        value={value}
+        style={styles}
+        rows={maxRows}
         inputRef={refs}
         onBlur={onBlur}
-        defaultValue={defaultValue}
-        value={value}
-        size={size}
-        onChange={handleChange}
-        style={styles}
-        sx={{ marginBottom: 3 }}
+        required={required}
         {...otherInputProps}
+        multiline={multiline}
+        onChange={handleChange}
+        sx={{ marginBottom: 3 }}
+        defaultValue={defaultValue}
       />
     </FormControl>
   );

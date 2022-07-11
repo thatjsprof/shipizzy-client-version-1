@@ -1,14 +1,14 @@
-import React, { PropsWithChildren } from "react";
 import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import { CardActionArea } from "@mui/material";
 import style from "./Card.module.scss";
+import { CardActionArea } from "@mui/material";
+import React, { PropsWithChildren } from "react";
+import Typography from "@mui/material/Typography";
+import CardContent from "@mui/material/CardContent";
 
 type UICardProps = PropsWithChildren<{
-  title: string | JSX.Element;
-  styles?: object;
   body?: string;
+  styles?: object;
+  title: string | JSX.Element;
 }>;
 
 const UICard = ({ title, body, styles, children }: UICardProps) => {

@@ -1,10 +1,10 @@
+import * as AppRoutes from "./App";
 import * as AuthRoutes from "./Auth/Auth";
-import * as AppRoutes from './App'
 
 const LandingRoutes = {
   INDEX: "",
-  ABOUT_US: 'about-us',
-  CONTACT: 'contact'
+  CONTACT: "contact",
+  ABOUT_US: "about-us",
 };
 
 export { AuthRoutes, LandingRoutes, AppRoutes };

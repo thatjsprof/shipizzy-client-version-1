@@ -1,8 +1,8 @@
 import React from "react";
+import { makeStyles } from "@mui/styles";
+import theme from "App/Layout/CustomTheme";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import theme from "../../../App/Layout/CustomTheme";
-import { makeStyles } from "@mui/styles";
 
 interface LoaderProps {
   show: boolean;
@@ -11,14 +11,14 @@ interface LoaderProps {
 
 const useStyles = makeStyles({
   root: {
-    position: "relative",
     marginTop: "10px",
+    position: "relative",
   },
   backdrop: {
-    backgroundColor: "white !important",
     display: "flex",
     flexDirection: "column",
     zIndex: theme.zIndex.drawer + 1,
+    backgroundColor: "white !important",
   },
 });
 

@@ -1,41 +1,59 @@
-import React from "react";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/styles";
+import React, { useEffect } from "react";
 import Button from "@mui/material/Button";
+import theme from "App/Layout/CustomTheme";
 import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
-import theme from "../../../../App/Layout/CustomTheme";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { fulfillmentTypes } from "Constants/Fulfillment";
+import { useAppDispatch, useAppSelector } from "Store/Hooks";
+import { setFulfillmentOption } from "Store/FulfillmentSlice";
+import { FulfillmentStages, FulfillmentTypes } from "Interfaces/Fulfillment";
 
 interface IProps {
+  createFulfillment: any;
   handleBack: () => void;
   handleNext: () => void;
 }
 
 const FulfillmentsType = (props: IProps) => {
-  const [checked, setChecked] = React.useState("");
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.user);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const { fulfillmentType } = useAppSelector((state) => state.fulfillment);
+  const [checked, setChecked] = React.useState<FulfillmentTypes | string>("");
 
-  const { handleBack, handleNext } = props;
+  const { handleBack, handleNext, createFulfillment } = props;
 
   const handleChange = (selected: string) => {
     setChecked(selected);
   };
 
-  const fulfillmentTypes = [
-    {
-      name: "Drop-off",
-      label: "drop-off",
-      description:
-        "Drop off your items at the nearest Shipizzy fulfillment center",
-      price: "Free",
-    },
-    {
-      name: "Request a Pick-up",
-      label: "pick-up",
-      description:
-        "Pick up within Lagos is free. A dispatch rider will pick up your items at your preferred location",
-      price: "N500 / Free",
-    },
-  ];
+  const makeFulfillment = async () => {
+    setLoading(true);
+    const data = await createFulfillment({
+      fulfillmentDetails: {
+        type: checked,
+        userId: user?.id,
+      },
+    });
+
+    if (data) {
+      dispatch(
+        setFulfillmentOption({
+          stage: FulfillmentStages.sender,
+          type: checked as FulfillmentTypes,
+        })
+      );
+      handleNext();
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fulfillmentType && setChecked(fulfillmentType as string);
+  }, [fulfillmentType]);
 
   return (
     <Box>
@@ -57,27 +75,26 @@ const FulfillmentsType = (props: IProps) => {
 
               const CheckboxStyled = styled(Box)(() => ({
                 padding: "20px",
-                color:
-                  label === checked ? theme.palette.primary.dark : "#586274",
                 cursor: "pointer",
                 borderRadius: "5px",
                 marginBottom: "15px",
-                border: `1px solid ${
-                  label === checked ? theme.palette.primary.main : "#ddd"
-                }`,
-
                 "& .MuiCheckbox-root": {
                   padding: "0px",
                 },
+                border: `1px solid ${
+                  label === checked ? theme.palette.primary.main : "#ddd"
+                }`,
+                color:
+                  label === checked ? theme.palette.primary.dark : "#586274",
               }));
 
               return (
-                <CheckboxStyled onClick={() => handleChange(label)}>
+                <CheckboxStyled key={name} onClick={() => handleChange(label)}>
                   <Box sx={{ display: "flex", mb: 3 }}>
                     <Box sx={{ flexGrow: 1 }}>
                       <Checkbox
-                        inputProps={{ "aria-label": "controlled" }}
                         checked={checked === label}
+                        inputProps={{ "aria-label": "controlled" }}
                       />
                     </Box>
                     <Typography
@@ -104,9 +121,15 @@ const FulfillmentsType = (props: IProps) => {
                   Back
                 </Button>
               </Box>
-              <Button onClick={handleNext} size="large" variant="contained">
+              <LoadingButton
+                size="large"
+                loading={loading}
+                variant="contained"
+                disabled={!checked}
+                onClick={makeFulfillment}
+              >
                 Next
-              </Button>
+              </LoadingButton>
             </Box>
           </Box>
         </Box>

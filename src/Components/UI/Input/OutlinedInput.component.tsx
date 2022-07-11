@@ -1,40 +1,40 @@
 import React from "react";
-import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import OutlinedInput from "@mui/material/OutlinedInput";
 
 interface UIOutlinedInputProps {
-  type: string;
-  required?: boolean;
-  name?: string;
   refs?: any;
-  error?: boolean;
+  type: string;
+  name?: string;
   label?: string;
-  defaultValue?: string;
   value?: string;
+  error?: boolean;
   styles?: object;
-  startAdornment?: React.ReactNode;
+  required?: boolean;
+  defaultValue?: string;
   endAdornment?: React.ReactNode;
-  variant?: "outlined" | "filled" | "standard";
+  startAdornment?: React.ReactNode;
   handleChange?: React.ChangeEventHandler<
     HTMLInputElement | HTMLTextAreaElement
   >;
+  variant?: "outlined" | "filled" | "standard";
 }
 
 const UIOutlinedInput = ({
-  label,
   type,
   name,
-  value,
-  defaultValue,
-  error,
   refs,
+  label,
+  value,
+  error,
   styles,
   required,
+  defaultValue,
   handleChange,
-  startAdornment = null,
   endAdornment = null,
   variant = "standard",
+  startAdornment = null,
   ...otherInputProps
 }: UIOutlinedInputProps) => {
   return (
@@ -43,20 +43,20 @@ const UIOutlinedInput = ({
         {label}
       </InputLabel>
       <OutlinedInput
-        id="outlined-adornment"
         type={type}
         name={name}
         value={value}
-        defaultValue={defaultValue}
         error={error}
-        inputRef={refs}
-        style={styles}
-        required={required}
-        onChange={handleChange}
-        startAdornment={startAdornment}
-        endAdornment={endAdornment}
         label={label}
+        style={styles}
+        inputRef={refs}
+        required={required}
         {...otherInputProps}
+        onChange={handleChange}
+        id="outlined-adornment"
+        defaultValue={defaultValue}
+        endAdornment={endAdornment}
+        startAdornment={startAdornment}
       />
     </FormControl>
   );

@@ -9,12 +9,12 @@ import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import theme from "../../../App/Layout/CustomTheme";
 import { Link, useLocation } from "react-router-dom";
-import CircularProgress from "@mui/material/CircularProgress";
-import UIButton from "../../../Components/UI/Button/Button.component";
 import {
   DECODE_TOKEN,
   VERIFY_USER,
 } from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
+import CircularProgress from "@mui/material/CircularProgress";
+import UIButton from "../../../Components/UI/Button/Button.component";
 
 interface ResponseInterface {
   message: string;
@@ -44,14 +44,14 @@ const Response = ({ message, status }: ResponseInterface) => {
 };
 
 const VerifyAccount = ({ decodeToken, verifyUser }: any) => {
-  const [loading, setLoading] = useState<boolean>(false);
   const [todayDate] = useState<number>(new Date().getTime() / 1000);
+  const [loading, setLoading] = useState<boolean>(false);
   const [, setVerified] = useState<string>("");
   const [data, setData] = useState<{
     id: string;
-    email: string;
     iat: number;
     exp: number;
+    email: string;
   }>({
     id: "",
     email: "",
@@ -70,7 +70,7 @@ const VerifyAccount = ({ decodeToken, verifyUser }: any) => {
           const data = await decodeToken({
             variables: { token },
           });
-          const userInfo = data.data.verifyToken;
+          const userInfo = data.verifyToken;
           const result = await verifyUser({
             variables: { id: userInfo.id },
           });
