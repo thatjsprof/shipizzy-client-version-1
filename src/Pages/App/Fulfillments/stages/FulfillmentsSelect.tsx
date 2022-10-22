@@ -1,7 +1,9 @@
 import React from "react";
 import Box from "@mui/material/Box";
+import { SxProps } from "@mui/material";
 import { useAppDispatch } from "Store/Hooks";
 import Typography from "@mui/material/Typography";
+import QuoteModal from "../components/QuoteModal";
 import UIButton from "Components/UI/Button/Button.component";
 import { setFulfillmentOption } from "Store/FulfillmentSlice";
 import { FulfillmentOption, FulfillmentStages } from "Interfaces/Fulfillment";
@@ -13,38 +15,65 @@ interface IProps {
 const FulfillmentsSelect = (props: IProps) => {
   const { handleNext } = props;
   const dispatch = useAppDispatch();
+  const [show, setShow] = React.useState<boolean>(false);
 
   const handleClick = (option: FulfillmentOption) => {
     dispatch(
       setFulfillmentOption({
-        option,
+        fulfillmentOption: option,
         stage: FulfillmentStages.type,
       })
     );
     handleNext();
   };
 
+  const buttonStyle: SxProps = {
+    width: "100%",
+    padding: "0.8rem",
+    fontSize: "1.5rem",
+  };
+
   return (
     <Box>
-      <Box sx={{ p: 2, display: "grid", justifyContent: "center" }}>
-        <Box sx={{ marginTop: "8rem", width: "50rem" }}>
+      <Box
+        sx={{
+          p: 2,
+          display: "grid",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            marginTop: "8rem",
+            width: "50rem",
+          }}
+        >
           <Typography
             variant="h4"
-            sx={{ fontWeight: 700, letterSpacing: "1px" }}
+            sx={{
+              fontWeight: 700,
+              letterSpacing: "1px",
+            }}
           >
             Choose an Option
           </Typography>
-          <Typography sx={{ mt: 1 }}>
+          <Typography
+            sx={{
+              mt: 1,
+            }}
+          >
             Please select what you would like to do
           </Typography>
 
-          <Box sx={{ marginTop: "8rem" }}>
+          <Box
+            sx={{
+              marginTop: "8rem",
+            }}
+          >
             <UIButton
               styles={{
-                width: "100%",
-                padding: "0.8rem",
+                ...buttonStyle,
                 marginBottom: "2rem",
-                fontSize: "1.5rem",
               }}
               type="button"
               variant="outlined"
@@ -54,10 +83,8 @@ const FulfillmentsSelect = (props: IProps) => {
             </UIButton>
             <UIButton
               styles={{
-                width: "100%",
-                padding: "0.8rem",
+                ...buttonStyle,
                 marginBottom: "2rem",
-                fontSize: "1.5rem",
               }}
               disabled
               type="button"
@@ -67,15 +94,23 @@ const FulfillmentsSelect = (props: IProps) => {
               Book an Import
             </UIButton>
             <UIButton
-              styles={{ width: "100%", padding: "0.8rem", fontSize: "1.5rem" }}
               type="button"
               variant="contained"
+              styles={buttonStyle}
+              handleClick={() => setShow(true)}
             >
               Request a Quote
             </UIButton>
           </Box>
         </Box>
       </Box>
+      <QuoteModal
+        show={show}
+        close={() => {
+          setShow(false);
+        }}
+        title="Request a quote"
+      />
     </Box>
   );
 };

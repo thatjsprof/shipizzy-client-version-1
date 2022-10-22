@@ -1,3 +1,9 @@
+import {
+  IFulfillment,
+  FulfillmentTypes,
+  FulfillmentStages,
+  FulfillmentStatus,
+} from "Interfaces/Fulfillment";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/styles";
 import React, { useEffect } from "react";
@@ -9,12 +15,13 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { fulfillmentTypes } from "Constants/Fulfillment";
 import { useAppDispatch, useAppSelector } from "Store/Hooks";
 import { setFulfillmentOption } from "Store/FulfillmentSlice";
-import { FulfillmentStages, FulfillmentTypes } from "Interfaces/Fulfillment";
 
 interface IProps {
-  createFulfillment: any;
   handleBack: () => void;
   handleNext: () => void;
+  createFulfillment: (payload: {
+    fulfillmentDetails: IFulfillment;
+  }) => Promise<any>;
 }
 
 const FulfillmentsType = (props: IProps) => {
@@ -32,23 +39,26 @@ const FulfillmentsType = (props: IProps) => {
 
   const makeFulfillment = async () => {
     setLoading(true);
+
     const data = await createFulfillment({
       fulfillmentDetails: {
         type: checked,
-        userId: user?.id,
+        userId: user?.id as string,
+        status: FulfillmentStatus.DRAFT,
       },
     });
 
     if (data) {
+      setLoading(false);
       dispatch(
         setFulfillmentOption({
+          id: data.addFulfillment._id,
           stage: FulfillmentStages.sender,
-          type: checked as FulfillmentTypes,
+          fulfillmentType: checked as FulfillmentTypes,
         })
       );
       handleNext();
-    }
-    setLoading(false);
+    } else setLoading(false);
   };
 
   useEffect(() => {
@@ -57,11 +67,25 @@ const FulfillmentsType = (props: IProps) => {
 
   return (
     <Box>
-      <Box sx={{ p: 2, display: "grid", justifyContent: "center" }}>
-        <Box sx={{ width: "50rem" }}>
+      <Box
+        sx={{
+          p: 2,
+          display: "grid",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            width: "50rem",
+          }}
+        >
           <Typography
             variant="h4"
-            sx={{ fontWeight: 700, marginTop: "2rem", letterSpacing: "1px" }}
+            sx={{
+              fontWeight: 700,
+              marginTop: "2rem",
+              letterSpacing: "1px",
+            }}
           >
             Fulfillment Type
           </Typography>
@@ -69,7 +93,11 @@ const FulfillmentsType = (props: IProps) => {
             Please select your preferred shipping option
           </Typography>
 
-          <Box sx={{ marginTop: "3rem" }}>
+          <Box
+            sx={{
+              marginTop: "3rem",
+            }}
+          >
             {fulfillmentTypes.map((type) => {
               const { name, label, description, price } = type;
 
@@ -90,24 +118,45 @@ const FulfillmentsType = (props: IProps) => {
 
               return (
                 <CheckboxStyled key={name} onClick={() => handleChange(label)}>
-                  <Box sx={{ display: "flex", mb: 3 }}>
-                    <Box sx={{ flexGrow: 1 }}>
+                  <Box
+                    sx={{
+                      mb: 3,
+                      display: "flex",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                      }}
+                    >
                       <Checkbox
                         checked={checked === label}
                         inputProps={{ "aria-label": "controlled" }}
                       />
                     </Box>
                     <Typography
-                      sx={{ textTransform: "uppercase", fontWeight: 700 }}
+                      sx={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                      }}
                     >
                       {price}
                     </Typography>
                   </Box>
                   <Box>
-                    <Typography sx={{ mb: 1, fontWeight: 700 }}>
+                    <Typography
+                      sx={{
+                        mb: 1,
+                        fontWeight: 700,
+                      }}
+                    >
                       {name}
                     </Typography>
-                    <Typography sx={{ maxWidth: "500px" }}>
+                    <Typography
+                      sx={{
+                        maxWidth: "500px",
+                      }}
+                    >
                       {description}
                     </Typography>
                   </Box>
@@ -115,8 +164,17 @@ const FulfillmentsType = (props: IProps) => {
               );
             })}
 
-            <Box sx={{ display: "flex", marginTop: "55px" }}>
-              <Box sx={{ flexGrow: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                marginTop: "55px",
+              }}
+            >
+              <Box
+                sx={{
+                  flexGrow: 1,
+                }}
+              >
                 <Button onClick={handleBack} size="large" variant="outlined">
                   Back
                 </Button>

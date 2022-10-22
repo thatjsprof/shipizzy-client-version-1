@@ -1,4 +1,9 @@
 import {
+  CreatePaymentResponse,
+  VerifyPaymentResponse,
+} from "Graphql/Responses";
+import {
+  IPayloadInt,
   FulfillmentStages,
   FulfillmentStagesReverse,
 } from "Interfaces/Fulfillment";
@@ -9,59 +14,100 @@ import Stack from "@mui/material/Stack";
 import React, { useEffect } from "react";
 import Button from "@mui/material/Button";
 import Stepper from "@mui/material/Stepper";
-import { useAppSelector } from "Store/Hooks";
+import { IError } from "Utils/GraphqlRequest";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
+import FulfillmentsType from "./stages/FulfillmentsType";
+import FulfillmentsSender from "./stages/FulfillmentSender";
+import FulfillmentsStatus from "./stages/FulfillmentsStatus";
+import { useAppDispatch, useAppSelector } from "Store/Hooks";
 import FulfillmentsSelect from "./stages/FulfillmentsSelect";
-import FulfillmentsSender from "./stages/FulfillmentsSender";
 import FulfillmentSummary from "./stages/FulfillmentSummary";
+import FulfillmentsPayment from "./stages/FulfillmentPayment";
+import { setFulfillmentOption } from "Store/FulfillmentSlice";
 import ColorlibConnector from "./components/ColorlibConnector";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import FulfillmentsReceiver from "./stages/FulfillmentsReceiver";
+import FulfillmentsRecepient from "./stages/FulfillmentsRecepient";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import FulfillmentShippingType from "./stages/FulfillmentShippingType";
+import { IPayloadValue, IVerifyPayloadValue } from "Interfaces/Payment";
 import FulfillmentsItemDescription from "./stages/FulfillmentItemDescription";
-import FulfillmentsTypeContainer from "./stages/FulfillmentType/FulfillmentTypeContainer";
 
-export default function FulfillmentApplication() {
+interface IProps {
+  makeEditUser: (payload: IPayloadInt) => Promise<any>;
+  createFulfillment: (payload: IPayloadInt) => Promise<any>;
+  makeEditFulfillment: (payload: IPayloadInt) => Promise<any>;
+  addTransaction: (payload: { transactionDetails: any }) => Promise<any>;
+  createPayment: (payload: IPayloadValue) => CreatePaymentResponse;
+  verifyPayment: (payload: IVerifyPayloadValue) => Promise<{
+    data: VerifyPaymentResponse;
+    error: IError | null;
+  }>;
+}
+
+export default function FulfillmentApplication({
+  makeEditUser,
+  createPayment,
+  verifyPayment,
+  addTransaction,
+  createFulfillment,
+  makeEditFulfillment,
+}: IProps) {
+  const dispatch = useAppDispatch();
   const [activeStep, setActiveStep] = React.useState(1);
   const { stage } = useAppSelector((state) => state.fulfillment);
 
   const Breadcrumb = ({
     index,
     children,
+    stageInner,
   }: {
     index?: number;
     children: React.ReactElement;
-  }) => (
-    <Box
-      component="span"
-      onClick={() => handleSelect(index as number)}
-      sx={{ color: activeStep === index ? "#cc6600" : "#424a57" }}
-    >
-      {children}
-    </Box>
-  );
+    stageInner: FulfillmentStages;
+  }) => {
+    return (
+      <Box
+        component="span"
+        onClick={() => {
+          dispatch(
+            setFulfillmentOption({
+              stage: stageInner,
+            })
+          );
+        }}
+        sx={{ color: activeStep === index ? "#cc6600" : "#424a57" }}
+      >
+        {children}
+      </Box>
+    );
+  };
 
   const pageSelectedState = [
     "",
     "",
-    <Breadcrumb index={2}>
+    <Breadcrumb index={2} stageInner={FulfillmentStages.type}>
       <span>Fulfillment Type</span>
     </Breadcrumb>,
-    <Breadcrumb index={3}>
+    <Breadcrumb index={3} stageInner={FulfillmentStages.sender}>
       <span>Sender's information</span>
     </Breadcrumb>,
-    <Breadcrumb index={4}>
+    <Breadcrumb index={4} stageInner={FulfillmentStages.receiver}>
       <span>Receiver's information</span>
     </Breadcrumb>,
-    <Breadcrumb index={5}>
+    <Breadcrumb index={5} stageInner={FulfillmentStages.item}>
       <span>Items Description</span>
     </Breadcrumb>,
-    <Breadcrumb index={6}>
+    <Breadcrumb index={6} stageInner={FulfillmentStages.shipping}>
       <span>Shipping Option</span>
     </Breadcrumb>,
-    <Breadcrumb index={7}>
+    <Breadcrumb index={7} stageInner={FulfillmentStages.summary}>
       <span>Summary</span>
+    </Breadcrumb>,
+    <Breadcrumb index={8} stageInner={FulfillmentStages.payment}>
+      <span> Payment</span>
+    </Breadcrumb>,
+    <Breadcrumb index={9} stageInner={FulfillmentStages.payment}>
+      <span> Payment Status</span>
     </Breadcrumb>,
   ];
 
@@ -81,37 +127,75 @@ export default function FulfillmentApplication() {
     setActiveStep(1);
   };
 
-  const steps = Array.from({ length: 8 }, () => "");
+  const steps = Array.from({ length: 9 }, () => "");
   const pages = [
     "",
     <FulfillmentsSelect handleNext={handleNext} />,
-    <FulfillmentsTypeContainer
+    <FulfillmentsType
       handleBack={handleBack}
       handleNext={handleNext}
+      createFulfillment={createFulfillment}
     />,
-    <FulfillmentsSender handleBack={handleBack} handleNext={handleNext} />,
-    <FulfillmentsReceiver handleBack={handleBack} handleNext={handleNext} />,
+    <FulfillmentsSender
+      handleBack={handleBack}
+      handleNext={handleNext}
+      makeEditUser={makeEditUser}
+      editFulfillment={makeEditFulfillment}
+    />,
+    <FulfillmentsRecepient
+      handleBack={handleBack}
+      handleNext={handleNext}
+      makeEditUser={makeEditUser}
+      editFulfillment={makeEditFulfillment}
+    />,
     <FulfillmentsItemDescription
       handleBack={handleBack}
       handleNext={handleNext}
+      editFulfillment={makeEditFulfillment}
     />,
-    <FulfillmentShippingType handleBack={handleBack} handleNext={handleNext} />,
-    <FulfillmentSummary handleBack={handleBack} handleNext={handleNext} />,
+    <FulfillmentShippingType
+      handleBack={handleBack}
+      handleNext={handleNext}
+      editFulfillment={makeEditFulfillment}
+    />,
+    <FulfillmentSummary
+      handleBack={handleBack}
+      handleNext={handleNext}
+      handleSelect={handleSelect}
+    />,
+    <FulfillmentsPayment
+      handleBack={handleBack}
+      verifyPayment={verifyPayment}
+      addTransaction={addTransaction}
+      editFulfillment={makeEditFulfillment}
+    />,
+    <FulfillmentsStatus />,
   ];
 
   useEffect(() => {
     setActiveStep(FulfillmentStagesReverse[stage as FulfillmentStages] || 1);
+
+    if (stage === "FULFILLMENT_STATUS") {
+      setActiveStep(FulfillmentStagesReverse["FULFILLMENT_STATUS"]);
+    }
   }, [stage]);
 
   return (
-    <Box sx={{ width: "100%", marginBottom: "50px" }}>
-      <Stepper activeStep={activeStep} connector={<ColorlibConnector />}>
-        {steps.map((_, index) => (
-          <Step key={index} sx={{ padding: "0" }}></Step>
-        ))}
-      </Stepper>
+    <Box
+      sx={{
+        width: "100%",
+        marginBottom: "50px",
+      }}
+    >
+      {activeStep !== FulfillmentStagesReverse["FULFILLMENT_STATUS"] && (
+        <Stepper activeStep={activeStep} connector={<ColorlibConnector />}>
+          {steps.map((_, index) => (
+            <Step key={index} sx={{ padding: "0" }}></Step>
+          ))}
+        </Stepper>
+      )}
       <Box>
-        {activeStep === steps.length ? (
+        {activeStep === steps.length + 1 ? (
           <Box
             sx={{
               display: "flex",
@@ -120,8 +204,18 @@ export default function FulfillmentApplication() {
               justifyContent: "center",
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-              <Box sx={{ flex: "1 1 auto" }} />
+            <Box
+              sx={{
+                pt: 2,
+                display: "flex",
+                flexDirection: "row",
+              }}
+            >
+              <Box
+                sx={{
+                  flex: "1 1 auto",
+                }}
+              />
               <Button onClick={handleReset}>Reset</Button>
             </Box>
           </Box>
@@ -132,7 +226,12 @@ export default function FulfillmentApplication() {
               margin: "3.2rem auto 0 auto",
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <Link to="/fulfillments">
                 <Box
                   sx={{
@@ -156,7 +255,15 @@ export default function FulfillmentApplication() {
                   separator={<NavigateNextIcon fontSize="small" />}
                   aria-label="breadcrumb"
                 >
-                  {[pageSelectedState.slice(1, activeStep + 1)]}
+                  {[
+                    pageSelectedState.slice(
+                      activeStep !==
+                        FulfillmentStagesReverse["FULFILLMENT_STATUS"]
+                        ? 1
+                        : activeStep,
+                      activeStep + 1
+                    ),
+                  ]}
                 </Breadcrumbs>
               </Stack>
             </Box>
