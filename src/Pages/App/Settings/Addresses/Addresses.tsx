@@ -1,98 +1,254 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Typography from "@mui/material/Typography";
+import toast from "react-hot-toast";
+import { AddressSchema } from "Schemas";
+import { Link } from "react-router-dom";
 import Stack from "@mui/material/Stack";
+import { IUser } from "Interfaces/Auth";
+import { useForm } from "react-hook-form";
+import { regExp } from "Constants/General";
+import { instanceOf } from "Utils/Helpers";
 import Divider from "@mui/material/Divider";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import { useAppSelector } from "Store/Hooks";
 import styles from "./Addresses.module.scss";
-import UIButton from "../../../../Components/UI/Button/Button.component";
-import UIInput from "../../../../Components/UI/Input/Input.component";
-import UIModal from "../../../../Components/UI/Modal/Modal.component";
-import UISelect from "../../../../Components/UI/Select/Select.component";
+import { Address } from "Interfaces/Address";
+import AddressesModal from "./AddressesModal";
+import EditIcon from "@mui/icons-material/Edit";
+import Typography from "@mui/material/Typography";
+import { getAddresses } from "Store/AddressSlice";
+import React, { useEffect, useState } from "react";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { yupResolver } from "@hookform/resolvers/yup";
+import DeleteAddressModal from "./AddressesDeleteModal";
+import { City, Country, State } from "country-state-city";
+import UIButton from "Components/UI/Button/Button.component";
+import { IRequestProps, RQProps } from "Utils/GraphqlRequest";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import { IPayloadType } from "Components/UI/Select/Select.component";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import { ICity, ICountry, IState } from "country-state-city/dist/lib/interface";
 
-interface IPayload {
-  recepientName: string;
-  phoneNumber: string;
-  state: string;
-  city: string;
-  additionalInfo: string;
-  status?: boolean;
-}
-interface PayloadFromAPI {
-  [index: string]: any;
-  mainAddresses: Array<IPayload>;
-  subAddresses: Array<IPayload>;
+interface AddressPayload extends Address {
+  userID: string;
 }
 
-const Addresses = () => {
-  const [newAddress, setNewAddress] = useState<boolean>(false);
-  const [addresses, setAddresses] = useState<PayloadFromAPI>({
-    mainAddresses: [
-      {
-        recepientName: "David Ajayi",
-        phoneNumber: "08091289193",
-        state: "lagos",
-        city: "ibeju-lekki",
-        additionalInfo: "Besides Awoyaya street",
-      },
-      {
-        recepientName: "Samuel Ajayi",
-        phoneNumber: "08021543193",
-        state: "lagos",
-        city: "ibeju-lekki",
-        additionalInfo: "Besides Dangote street",
-      },
-    ],
-    subAddresses: [
-      {
-        recepientName: "David Ajayi",
-        phoneNumber: "07082198323",
-        state: "lagos",
-        city: "ibeju-lekki",
-        additionalInfo: "Besides Otedola close",
-      },
-    ],
+export interface IAddressPayload {
+  id?: string;
+  addressDetails: AddressPayload;
+}
+
+interface IddressProps {
+  user: IUser;
+  loading: boolean;
+  loadingFetch: boolean;
+  loadingDelete: boolean;
+  makeAddAddress: (payload: IAddressPayload) => Promise<any>;
+  makeEditAddress: (payload: IAddressPayload) => Promise<any>;
+  makeDeleteAddress: (payload: { id: string }) => Promise<any>;
+  makeGetAddress: (props?: RQProps | undefined) => Promise<any>;
+}
+
+const Addresses = ({
+  user,
+  loading,
+  loadingDelete,
+  makeGetAddress,
+  makeAddAddress,
+  makeEditAddress,
+  makeDeleteAddress,
+}: IddressProps) => {
+  const [toDelete, setToDelete] = useState<string>("");
+  const [type, setType] = useState<"add" | "edit">("add");
+  const [states, setStates] = useState<IPayloadType[]>([]);
+  const [cities, setCities] = useState<IPayloadType[]>([]);
+  const [countries, setCountries] = useState<IPayloadType[]>([]);
+  const [showAddressModal, setShowAddressModal] = useState<boolean>(false);
+  const [showAddressDeleteModal, setShowAddressDeleteModal] =
+    useState<boolean>(false);
+  const { addresses } = useAppSelector((state) => state.address);
+
+  const mainAddresses = addresses.mainAddresses as Required<Address[]>;
+  const subAddresses = addresses.subAddresses as Required<Address[]>;
+
+  const listAddresses = React.useCallback(async () => {
+    if (mainAddresses.length === 0 || subAddresses.length === 0) {
+      let requestOptions: IRequestProps = {
+        payloadOptions: {
+          variables: {
+            id: user.id as string,
+          },
+        },
+        requestFunction: makeGetAddress,
+      };
+
+      await getAddresses(requestOptions);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, mainAddresses, subAddresses]);
+
+  useEffect(() => {
+    listAddresses();
+  }, [listAddresses]);
+
+  const {
+    reset,
+    watch,
+    setValue,
+    register,
+    getValues,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Address>({
+    defaultValues: {
+      _id: "",
+      name: "",
+      city: "",
+      state: "",
+      country: "",
+      postalCode: "",
+      phoneNumber: "",
+      addressLine1: "",
+      addressLine2: "",
+      additionalInfo: "",
+      addressType: "international",
+    },
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+    resolver: yupResolver(AddressSchema.CreateAddress),
   });
 
-  const setFormState = (value: string, index: number) => {
-    setAddresses((prevAddresses) => {
-      const newAddresses = [...prevAddresses[value]];
+  const onSubmit = async (payload: Address, type: "add" | "edit") => {
+    let successText = "";
 
-      newAddresses.splice(index, 1, {
-        ...newAddresses[index],
-        status: !newAddresses[index].status,
+    if (type === "add") {
+      delete payload._id;
+
+      await makeAddAddress({
+        addressDetails: {
+          ...payload,
+          userID: user.id as string,
+          state: `${State.getStateByCode(payload.state)?.name} (${
+            payload.state
+          })`,
+          country: `${Country.getCountryByCode(payload.country)?.name} (${
+            payload.country
+          })`,
+        },
       });
 
-      return {
-        ...prevAddresses,
-        [value]: Array.isArray(prevAddresses[value])
-          ? newAddresses
-          : !prevAddresses[value],
-      };
+      listAddresses();
+      successText = "Address has been successfully created";
+    } else {
+      const id = payload._id;
+      delete payload._id;
+
+      await makeEditAddress({
+        id,
+        addressDetails: {
+          ...payload,
+          userID: user.id as string,
+          state: `${State.getStateByCode(payload.state)?.name} (${
+            payload.state
+          })`,
+          country: `${Country.getCountryByCode(payload.country)?.name} (${
+            payload.country
+          })`,
+        },
+      });
+
+      listAddresses();
+      successText = "Address edited successfully";
+    }
+
+    reset();
+    setShowAddressModal(false);
+    toast.success(successText);
+  };
+
+  const onSubmitDelete = async () => {
+    const data = await makeDeleteAddress({
+      id: toDelete,
     });
+
+    if (data) {
+      toast.success(data.deleteAddress);
+      listAddresses();
+    }
+  };
+
+  const { state, country } = getValues();
+
+  const extractValues = (value: ICountry | IState | ICity) => {
+    if (instanceOf<ICountry | IState>(value, "isoCode")) {
+      return {
+        value: value.isoCode,
+        text: value.name,
+      };
+    } else {
+      return {
+        value: value.name,
+        text: value.name,
+      };
+    }
+  };
+
+  const setEditValues = (payload: Address) => {
+    const {
+      _id,
+      name,
+      city,
+      state,
+      country,
+      postalCode,
+      phoneNumber,
+      addressType,
+      addressLine1,
+      addressLine2,
+      additionalInfo,
+    } = payload;
+
+    setValue("_id", _id);
+    setValue("name", name);
+    setValue("city", city);
+    setValue("postalCode", postalCode);
+    setValue("phoneNumber", phoneNumber);
+    setValue("addressType", addressType);
+    setValue("addressLine1", addressLine1);
+    setValue("addressLine2", addressLine2);
+    setValue("additionalInfo", additionalInfo);
+    setValue("state", `${regExp.exec(state)?.[1]}`);
+    setValue("country", `${regExp.exec(country)?.[1]}`);
+
+    setType("edit");
+    setShowAddressModal(true);
+  };
+
+  const deleteAddress = (id: string) => {
+    setToDelete(id);
+    setShowAddressDeleteModal(true);
   };
 
   useEffect(() => {
-    // Do storing of addresses in here
-    setAddresses((addresses: PayloadFromAPI) => {
-      const { mainAddresses, subAddresses } = addresses;
+    if (country) {
+      setStates(State.getStatesOfCountry(country).map(extractValues));
+    }
+  }, [country]);
 
-      return {
-        ...addresses,
-        mainAddresses: mainAddresses.map((address: IPayload) => ({
-          ...address,
-          status: false,
-        })),
-        subAddresses: subAddresses.map((address: IPayload) => ({
-          ...address,
-          status: false,
-        })),
-      };
-    });
+  useEffect(() => {
+    if (country && state) {
+      setCities(City.getCitiesOfState(country, state).map(extractValues));
+    }
+  }, [country, state]);
+
+  useEffect(() => {
+    setCountries(
+      Country.getAllCountries().map((country) => ({
+        value: country.isoCode,
+        text: country.name,
+      }))
+    );
   }, []);
 
   const breadcrumbs = [
@@ -104,19 +260,73 @@ const Addresses = () => {
     </Link>,
   ];
 
-  const { subAddresses, mainAddresses } = addresses;
+  const showAddress = (index: number, address: Address) => {
+    const { name, state, country, phoneNumber } = address;
+
+    return (
+      <Box
+        key={index}
+        sx={{
+          display: "flex",
+        }}
+      >
+        <Box
+          sx={{
+            flexGrow: 1,
+            pb: ".7rem",
+          }}
+        >
+          <Typography>{`${name}, ${phoneNumber}, ${country
+            .replace(regExp, "")
+            .trim()}, ${state.replace(regExp, "").trim()}`}</Typography>
+        </Box>
+        <span
+          style={{
+            height: "1rem",
+            marginLeft: "2rem",
+            display: "inline-block",
+          }}
+        >
+          <EditIcon
+            sx={{
+              mr: 2,
+              color: "#8bbd78",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setEditValues(address);
+            }}
+          />
+          <DeleteIcon
+            sx={{
+              color: "#E6534E",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              deleteAddress(address._id as string);
+            }}
+          />
+        </span>
+      </Box>
+    );
+  };
 
   return (
-    <div>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         <Link to="/settings">
           <Box
             sx={{
-              border: ".1rem solid #ddd",
               py: ".3rem",
               px: ".5rem",
-              borderRadius: ".5rem",
               mr: "1.5rem",
+              borderRadius: ".5rem",
+              border: ".1rem solid #ddd",
             }}
           >
             <ArrowBackIosNewIcon fontSize="small" />
@@ -124,9 +334,9 @@ const Addresses = () => {
         </Link>
         <Stack spacing={2}>
           <Breadcrumbs
+            aria-label="breadcrumb"
             sx={{ justifyContent: "center" }}
             separator={<NavigateNextIcon fontSize="small" />}
-            aria-label="breadcrumb"
           >
             {breadcrumbs}
           </Breadcrumbs>
@@ -135,252 +345,128 @@ const Addresses = () => {
       <Box className={styles.addresses__section}>
         <Box className={styles.addresses__section___aside}>
           <Typography variant="h5">Address Book</Typography>
-          <Typography sx={{ color: "#979797", mt: ".5rem" }}>
+          <Typography
+            sx={{
+              mt: ".5rem",
+              color: "#979797",
+            }}
+          >
             Edit, delete and add new addresses
           </Typography>
           <Box
             sx={{
-              backgroundColor: "#f6f6f7",
               py: "2rem",
               px: "1rem",
               mt: "1.5rem",
               color: "#484747",
+              backgroundColor: "#f6f6f7",
             }}
           >
-            <EmojiObjectsIcon sx={{ fontSize: "2.5rem", color: "#ffa64d" }} />
+            <EmojiObjectsIcon
+              sx={{
+                color: "#ffa64d",
+                fontSize: "2.5rem",
+              }}
+            />
             <Typography variant="body2">
-              The main address is used when you schedule a pickup
+              The international address is used for deliveries abroad
             </Typography>
             <Typography variant="body2">
-              Your main address is also put in your shipments description
+              The international address is also put in your shipments
+              description
             </Typography>
             <Typography variant="body2">
-              You can save as many sub addresses for easy checkout
+              You can save as many local addresses for easy pickup
             </Typography>
           </Box>
         </Box>
         <Box className={styles.addresses__section___main}>
           <Box sx={{ pb: "2rem" }}>
-            <Box sx={{ display: "flex", mb: "2rem" }}>
+            <Box
+              sx={{
+                mb: "2rem",
+                display: "flex",
+              }}
+            >
               <Box sx={{ flexGrow: 1 }}></Box>
               <UIButton
                 type="button"
                 variant="contained"
-                handleClick={() => setNewAddress(true)}
+                handleClick={() => {
+                  setType("add");
+                  setShowAddressModal(true);
+                }}
               >
                 Add new address
               </UIButton>
             </Box>
             <Box>
-              <Typography sx={{ color: "#979797", pb: ".8rem" }}>
-                Main Addresses
+              <Typography
+                sx={{
+                  pb: ".8rem",
+                  color: "#979797",
+                }}
+              >
+                International Addresses
               </Typography>
             </Box>
 
-            {mainAddresses.map((address: IPayload, index: number) => {
-              const {
-                recepientName,
-                phoneNumber,
-                state,
-                city,
-                additionalInfo,
-                status,
-              } = address;
-
-              return (
-                <Box sx={{ display: "flex" }} key={index}>
-                  <Box sx={{ flexGrow: 1, pb: ".7rem" }}>
-                    {status ? (
-                      <Box sx={{ mt: "1rem" }}>
-                        <UIInput
-                          type="text"
-                          value={recepientName}
-                          label="Recepient Name"
-                        />
-                        <UIInput
-                          type="number"
-                          value={phoneNumber}
-                          label="Phone Number"
-                        />
-                        <UISelect
-                          value={state}
-                          label="State"
-                          options={[{ text: "Lagos", value: "lagos" }]}
-                        />
-                        <UISelect
-                          value={city}
-                          label="City"
-                          options={[
-                            { text: "Ibeju Lekki", value: "ibeju-lekki" },
-                          ]}
-                        />
-                        <UIInput
-                          value={additionalInfo}
-                          type="text"
-                          multiline
-                          maxRows={4}
-                          label="Additional information / Landmark"
-                        />
-                        <UIButton
-                          type="button"
-                          size="large"
-                          styles={{
-                            marginBottom:
-                              index !== mainAddresses.length - 1
-                                ? "2rem"
-                                : "0rem",
-                          }}
-                          variant="contained"
-                        >
-                          Save
-                        </UIButton>
-                      </Box>
-                    ) : (
-                      <Typography>{`${recepientName}, ${phoneNumber}, ${city}, ${state}`}</Typography>
-                    )}
-                  </Box>
-                  <span
-                    style={{
-                      color: "#003366",
-                      marginLeft: "2rem",
-                      cursor: "pointer",
-                      display: "inline-block",
-                      height: "1rem",
-                    }}
-                    onClick={() => setFormState("mainAddresses", index)}
-                  >
-                    {status ? "Close" : "Edit"}
-                  </span>
-                </Box>
-              );
-            })}
+            {mainAddresses.length > 0 ? (
+              mainAddresses.map((address: Address, index: number) => {
+                return showAddress(index, address);
+              })
+            ) : (
+              <Box>No International Addresses Found</Box>
+            )}
           </Box>
           <Divider />
           <Box sx={{ py: "2rem" }}>
             <Box>
-              <Typography sx={{ color: "#979797", pb: ".8rem" }}>
-                Sub Addresses
+              <Typography
+                sx={{
+                  pb: ".8rem",
+                  color: "#979797",
+                }}
+              >
+                Local Addresses
               </Typography>
             </Box>
 
-            {subAddresses.map((address: IPayload, index: number) => {
-              const {
-                recepientName,
-                phoneNumber,
-                state,
-                city,
-                additionalInfo,
-                status,
-              } = address;
-
-              return (
-                <Box sx={{ display: "flex" }} key={index}>
-                  <Box sx={{ flexGrow: 1, pb: ".7rem" }}>
-                    {status ? (
-                      <Box sx={{ mt: "1rem" }}>
-                        <UIInput
-                          type="text"
-                          value={recepientName}
-                          label="Recepient Name"
-                        />
-                        <UIInput
-                          type="number"
-                          value={phoneNumber}
-                          label="Phone Number"
-                        />
-                        <UISelect
-                          value={state}
-                          label="State"
-                          options={[{ text: "Lagos", value: "lagos" }]}
-                        />
-                        <UISelect
-                          value={city}
-                          label="City"
-                          options={[
-                            { text: "Ibeju Lekki", value: "ibeju-lekki" },
-                          ]}
-                        />
-                        <UIInput
-                          value={additionalInfo}
-                          type="text"
-                          multiline
-                          maxRows={4}
-                          label="Additional information / Landmark"
-                        />
-                        <UIButton
-                          type="button"
-                          size="large"
-                          styles={{
-                            marginBottom:
-                              index !== subAddresses.length - 1
-                                ? "2rem"
-                                : "0rem",
-                          }}
-                          variant="contained"
-                        >
-                          Save
-                        </UIButton>
-                      </Box>
-                    ) : (
-                      <Typography>{`${recepientName}, ${phoneNumber}, ${city}, ${state}`}</Typography>
-                    )}
-                  </Box>
-                  <span
-                    style={{
-                      color: "#003366",
-                      marginLeft: "2rem",
-                      cursor: "pointer",
-                      display: "inline-block",
-                      height: "1rem",
-                    }}
-                    onClick={() => setFormState("subAddresses", index)}
-                  >
-                    {status ? "Close" : "Edit"}
-                  </span>
-                </Box>
-              );
-            })}
+            {subAddresses.length > 0 ? (
+              subAddresses.map((address: Address, index: number) => {
+                return showAddress(index, address);
+              })
+            ) : (
+              <Typography>No Local Addresses Found</Typography>
+            )}
           </Box>
         </Box>
       </Box>
-      <UIModal
-        open={newAddress}
-        title="Add New Address"
-        handleClose={() => setNewAddress(false)}
-      >
-        <UIInput type="text" label="Recepient Name" />
-        <UIInput type="number" label="Phone Number" />
-        <UISelect label="State" options={[{ text: "Lagos", value: "lagos" }]} />
-        <UISelect
-          label="City"
-          options={[{ text: "Ibeju Lekki", value: "ibeju-lekki" }]}
-        />
-        <UIInput
-          type="text"
-          multiline
-          maxRows={4}
-          label="Additional information / Landmark"
-        />
-        <UISelect
-          defaultValue="main"
-          emptyValue={false}
-          label="Address Type"
-          options={[
-            { text: "Main Address", value: "main" },
-            { text: "Sub Address", value: "sub" },
-          ]}
-        />
-        <UIButton
-          type="button"
-          size="large"
-          disabled
-          styles={{ marginTop: "2rem" }}
-          variant="contained"
-        >
-          Save Address
-        </UIButton>
-      </UIModal>
-    </div>
+      <AddressesModal
+        type={type}
+        reset={reset}
+        watch={watch}
+        errors={errors}
+        cities={cities}
+        states={states}
+        loading={loading}
+        register={register}
+        setValue={setValue}
+        onSubmit={onSubmit}
+        getValues={getValues}
+        countries={countries}
+        handleSubmit={handleSubmit}
+        showAddressModal={showAddressModal}
+        setShowAddressModal={setShowAddressModal}
+        title={type === "add" ? "Add New Address" : "Edit Address"}
+      />
+      <DeleteAddressModal
+        loading={loadingDelete}
+        onSubmitDelete={onSubmitDelete}
+        showModal={showAddressDeleteModal}
+        setShowModal={setShowAddressDeleteModal}
+      />
+    </>
   );
 };
 
