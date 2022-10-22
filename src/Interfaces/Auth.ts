@@ -3,22 +3,29 @@ export interface ISignIn {
   password: string;
 }
 
+type UserSexTypes = "male" | "female" | "trans";
+type UserAccountTypes = "business" | "individual";
+
 export interface IUser {
   id: string | null;
   email: string | null;
   lastName: string | null;
   firstName: string | null;
   rcNumber?: string | null;
+  sex?: UserSexTypes | null;
   isVerified: boolean | null;
   businessName?: string | null;
-  sex?: "male" | "female" | null;
   dateOfBirth?: string | Date | null;
   phoneNumber?: string | number | null;
-  accountType?: "individual" | "business" | null;
+  defaultSenderAddress?: string | null;
+  accountType?: UserAccountTypes | null;
+  defaultReceiverAddress?: string | null;
 }
 
+export type PartialUser = Partial<IUser>;
+
 export interface UserState {
-  user: IUser;
+  user: Partial<IUser>;
   isInitialized: boolean;
   isAuthenticated?: boolean;
 }
@@ -55,6 +62,12 @@ export interface IResetPassword {
   newPassword: string;
 }
 
+export interface IChangePassword {
+  password: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface IUserInfo {
   name: string;
   email: string;
@@ -62,5 +75,5 @@ export interface IUserInfo {
 
 export type AccountType = {
   text: string;
-  value: "business" | "individual";
+  value: UserAccountTypes;
 };
