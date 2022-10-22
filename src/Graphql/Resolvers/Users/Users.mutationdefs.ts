@@ -65,11 +65,15 @@ export const SEND_RESET_TOKEN = gql`
 
 export const SEND_RESET_PASSWORD = gql`
   mutation SendResetPassword(
-    $token: String!
+    $id: String
+    $type: PasswordResetTypes
+    $token: String
     $password: String!
     $newPassword: String!
   ) {
     sendResetPassword(
+      id: $id
+      type: $type
       token: $token
       password: $password
       newPassword: $newPassword
@@ -94,6 +98,8 @@ export const GET_USER = gql`
       dateOfBirth
       phoneNumber
       businessName
+      defaultSenderAddress
+      defaultReceiverAddress
     }
   }
 `;
@@ -115,6 +121,8 @@ export const EDIT_USER = gql`
       phoneNumber
       dateOfBirth
       businessName
+      defaultSenderAddress
+      defaultReceiverAddress
     }
   }
 `;
