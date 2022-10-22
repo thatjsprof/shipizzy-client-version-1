@@ -1,3 +1,5 @@
+import { Address, IAddressType } from "Interfaces/Address";
+
 export const shippingData = [
   {
     price: "14211",
@@ -45,3 +47,20 @@ export const fulfillmentTypes = [
       "Pick up within Lagos is free. A dispatch rider will pick up your items at your preferred location",
   },
 ];
+
+export const emptyAddress: (type: IAddressType) => Address = (
+  type: IAddressType
+) => ({
+  addressType: type,
+  _id: "",
+  name: "",
+  city: "",
+  email: "",
+  state: "",
+  country: "",
+  postalCode: "",
+  phoneNumber: "",
+  addressLine1: "",
+  addressLine2: "",
+  additionalInfo: "",
+});

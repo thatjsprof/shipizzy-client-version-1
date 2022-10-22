@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import { Link } from "react-router-dom";
 import theme from "App/Layout/CustomTheme";
 import styles from "./Settings.module.scss";
+import { PartialUser } from "Interfaces/Auth";
 import Typography from "@mui/material/Typography";
 import UICard from "Components/UI/Card/Card.component";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
@@ -10,7 +11,11 @@ import PersonPinIcon from "@mui/icons-material/PersonPin";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 
-const Settings = ({ user }: any) => {
+interface SettingsProp {
+  user: PartialUser;
+}
+
+const Settings = ({ user }: SettingsProp) => {
   return (
     <div className={styles.settings}>
       <Typography
@@ -24,7 +29,10 @@ const Settings = ({ user }: any) => {
               title={
                 <div>
                   <PersonPinIcon
-                    sx={{ fontSize: "3rem", color: theme.palette.primary.main }}
+                    sx={{
+                      fontSize: "3rem",
+                      color: theme.palette.primary.main,
+                    }}
                   />
                   <Typography variant="h6">Personal Information</Typography>
                 </div>
@@ -40,7 +48,10 @@ const Settings = ({ user }: any) => {
               title={
                 <div>
                   <LockOpenIcon
-                    sx={{ fontSize: "3rem", color: theme.palette.primary.main }}
+                    sx={{
+                      fontSize: "3rem",
+                      color: theme.palette.primary.main,
+                    }}
                   />
                   <Typography variant="h6">Login & Security</Typography>
                 </div>
@@ -54,7 +65,10 @@ const Settings = ({ user }: any) => {
               title={
                 <div>
                   <ContactMailIcon
-                    sx={{ fontSize: "3rem", color: theme.palette.primary.main }}
+                    sx={{
+                      fontSize: "3rem",
+                      color: theme.palette.primary.main,
+                    }}
                   />
                   <Typography variant="h6">Address Book</Typography>
                 </div>
@@ -72,7 +86,10 @@ const Settings = ({ user }: any) => {
               title={
                 <div>
                   <ContactSupportIcon
-                    sx={{ fontSize: "3rem", color: theme.palette.primary.main }}
+                    sx={{
+                      fontSize: "3rem",
+                      color: theme.palette.primary.main,
+                    }}
                   />
                   <Typography variant="h6">Help & Support</Typography>
                 </div>

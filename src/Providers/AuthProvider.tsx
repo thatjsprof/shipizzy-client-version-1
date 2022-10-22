@@ -14,6 +14,7 @@ const AuthProvider = ({ getUser, children, decodeToken }: any) => {
     const initialize = async () => {
       const authToken = await Lf.getItem("authToken");
 
+      // if (authToken) {
       let requestOptionsDecodeToken: IRequestProps = {
         payloadOptions: {
           variables: { token: authToken },
@@ -22,6 +23,7 @@ const AuthProvider = ({ getUser, children, decodeToken }: any) => {
       };
 
       await getCurrentAuthenticatedUser(getUser, requestOptionsDecodeToken);
+      // }
     };
 
     initialize();

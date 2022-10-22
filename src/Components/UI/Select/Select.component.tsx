@@ -8,6 +8,11 @@ import {
 } from "@mui/material";
 import React from "react";
 
+export interface IPayloadType {
+  text: string;
+  value: string | number;
+}
+
 interface UISelectProps extends SelectProps {
   refs?: any;
   ID?: string;
@@ -19,12 +24,12 @@ interface UISelectProps extends SelectProps {
   required?: boolean;
   emptyValue?: boolean;
   defaultValue?: string;
+  options: IPayloadType[];
   size?: SelectProps["size"];
   endAdornment?: React.ReactNode;
   variant?: SelectProps["variant"];
   startAdornment?: React.ReactNode;
   handleChange?: (e: SelectChangeEvent) => void;
-  options: { value: string | number; text: string }[];
 }
 
 const UISelect = ({

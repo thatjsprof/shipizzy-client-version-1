@@ -6,17 +6,8 @@ import TextField, { TextFieldProps } from "@mui/material/TextField";
 interface UIInputProps {
   refs?: any;
   ID?: string;
-  onBlur?: any;
-  type: string;
-  name?: string;
-  label?: string;
-  value?: string;
   error?: boolean;
   styles?: object;
-  maxRows?: number;
-  required?: boolean;
-  multiline?: boolean;
-  defaultValue?: string;
   size?: "small" | "medium";
   handleChange?: React.ChangeEventHandler<
     HTMLInputElement | HTMLTextAreaElement

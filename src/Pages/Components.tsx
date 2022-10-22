@@ -1,11 +1,11 @@
 import React from "react";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import UIInput from "../Components/UI/Input/Input.component";
-import UISelect from "../Components/UI/Select/Select.component";
-import UITable from "../Components/UI/Table/Table.component";
-import Divider from "@mui/material/Divider";
+import UIInput from "Components/UI/Input/Input.component";
+import UITable from "Components/UI/Table/Table.component";
+import UISelect from "Components/UI/Select/Select.component";
 
 const options = [
   {
@@ -19,10 +19,10 @@ const options = [
 ];
 
 interface Data {
-  [x: string]: string | number;
-  id: string | number;
-  name: string;
   age: number;
+  name: string;
+  id: string | number;
+  [x: string]: string | number;
 }
 
 const data = [
@@ -36,18 +36,18 @@ const columns: Column[] = [
   { id: "id", label: "Name", minWidth: 170 },
   {
     id: "age",
-    label: "Population",
-    minWidth: 170,
     align: "right",
-    format: (value: number) => value.toLocaleString("en-US"),
+    minWidth: 170,
+    label: "Population",
+    format: (value: number | string) => value.toLocaleString("en-US"),
   },
   {
     id: "name",
-    label: "Size\u00a0(km\u00b2)",
     minWidth: 170,
     // align: "right",
-    format: (value: number) => value.toLocaleString("en-US"),
-  }
+    label: "Size\u00a0(km\u00b2)",
+    format: (value: number | string) => value.toLocaleString("en-US"),
+  },
 ];
 
 const ComponentsPage = () => {

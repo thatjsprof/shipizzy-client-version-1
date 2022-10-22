@@ -1,22 +1,24 @@
 import Box from "@mui/material/Box";
+import toast from "react-hot-toast";
 import { AuthSchema } from "Schemas";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import { useForm } from "react-hook-form";
 import styles from "./Account.module.scss";
-import { useAppSelector } from "Store/Hooks";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
+import { IResetPayload } from "./Account.container";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Visibility from "@mui/icons-material/Visibility";
+import { IChangePassword, IUser } from "Interfaces/Auth";
 import InputAdornment from "@mui/material/InputAdornment";
-import UIButton from "Components/UI/Button/Button.component";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import { UILoadingButton } from "Components/UI/Button/Button.component";
 import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
 
 interface AdornmentProps {
@@ -25,11 +27,16 @@ interface AdornmentProps {
   handleShowPassword: () => void;
 }
 
-const Account = () => {
+interface IAccountProps {
+  user: IUser;
+  loading: boolean;
+  sendResetPassword: (payload: IResetPayload) => Promise<any>;
+}
+
+const Account = ({ sendResetPassword, loading, user }: IAccountProps) => {
   const [showFields, setShowFields] = useState<{ [index: string]: boolean }>({
     password: false,
   });
-  const { user } = useAppSelector((state) => state.user);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -37,6 +44,16 @@ const Account = () => {
 
   const setFormState = (value: string) => {
     setShowFields({ ...showFields, [value]: !showFields[value] });
+  };
+
+  const closeFormState = (value: string) => {
+    setShowFields({ ...showFields, [value]: false });
+  };
+
+  const closePasswordIcons = () => {
+    setShowPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const breadcrumbs = [
@@ -49,10 +66,11 @@ const Account = () => {
   ];
 
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<any>({
+  } = useForm<IChangePassword>({
     mode: "onBlur",
     defaultValues: {
       password: "",
@@ -77,8 +95,21 @@ const Account = () => {
     setShowConfirmPassword((prevValue) => !prevValue);
   };
 
-  const onSubmit = async (payload: any) => {
-    //
+  const onSubmit = async (payload: IChangePassword) => {
+    const data = await sendResetPassword({
+      type: "change",
+      id: user.id as string,
+      password: payload.password,
+      newPassword: payload.newPassword,
+      confirmPassword: payload.confirmPassword,
+    });
+
+    if (data) {
+      reset();
+      closePasswordIcons();
+      closeFormState("password");
+      toast.success(data.sendResetPassword);
+    }
   };
 
   const EndAdornment = ({ show, handleShowPassword, text }: AdornmentProps) => {
@@ -187,6 +218,7 @@ const Account = () => {
               <Box
                 noValidate
                 component="form"
+                autoComplete="off"
                 sx={{ mt: "1rem" }}
                 onSubmit={handleSubmit(onSubmit)}
               >
@@ -246,9 +278,14 @@ const Account = () => {
                     {errors.confirmPassword.message}
                   </span>
                 )}
-                <UIButton size="large" type="submit" variant="contained">
+                <UILoadingButton
+                  size="large"
+                  type="submit"
+                  loading={loading}
+                  variant="contained"
+                >
                   Save
-                </UIButton>
+                </UILoadingButton>
               </Box>
             ) : (
               <Typography>Last Updated: Never</Typography>

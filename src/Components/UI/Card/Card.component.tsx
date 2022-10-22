@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import style from "./Card.module.scss";
 import { CardActionArea } from "@mui/material";
@@ -19,9 +20,7 @@ const UICard = ({ title, body, styles, children }: UICardProps) => {
           <Typography gutterBottom variant="h5" component="div">
             {title}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {children}
-          </Typography>
+          <Box color="text.secondary">{children}</Box>
         </CardContent>
       </CardActionArea>
     </Card>

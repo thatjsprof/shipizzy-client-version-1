@@ -4,11 +4,13 @@ import Table from "@mui/material/Table";
 import styles from "./Table.module.scss";
 import { styled } from "@mui/material/styles";
 import TableRow from "@mui/material/TableRow";
+import Backdrop from "@mui/material/Backdrop";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableContainer from "@mui/material/TableContainer";
 import TablePagination from "@mui/material/TablePagination";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface BaseData {
   [x: string]: any;
@@ -17,8 +19,16 @@ interface BaseData {
 
 interface UITableProps<Data> {
   data: Data[];
+  page?: number;
+  loading?: boolean;
+  totalRows?: number;
+  minHeight?: number;
   maxHeight?: number;
+  rowsPerPage?: number;
   columns: readonly Column[];
+  paginationOptions?: number[];
+  handleChangePage?: (page: number) => void;
+  handleChangeRowsPerPage?: (rowsPerPage: number) => void;
 }
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -33,40 +43,69 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 function UITable<Data extends BaseData>({
   data,
   columns,
-  maxHeight = 500,
+  page = 0,
+  maxHeight,
+  loading = false,
+  minHeight = 200,
+  rowsPerPage = 5,
+  paginationOptions,
+  totalRows: tRows = 0,
+  handleChangePage: handlePChange,
+  handleChangeRowsPerPage: handleRChange,
 }: UITableProps<Data>) {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(8);
+  const [totalRows, setTotalRows] = React.useState<number>(0);
+  const [tableData, setTableData] = React.useState<Data[]>([]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
+    handlePChange && handlePChange(newPage);
   };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+    handleRChange && handleRChange(+event.target.value);
   };
 
+  // Perform updates to data if needed
   function createData({ ...data }: Data): Data {
     return data;
   }
 
-  const rows = data.map((data) => {
-    return createData({ ...data });
-  });
+  const validData = (data: Data[]) =>
+    data.map((data) => {
+      return createData({ ...data });
+    });
+
+  React.useEffect(() => {
+    setTableData(data);
+    setTotalRows(tRows);
+  }, [data, tRows]);
+
+  // console.log("data from table component", data);
 
   return (
     <Paper
       sx={{
+        minHeight,
         width: "100%",
         border: "none",
         boxShadow: "none",
         overflow: "hidden",
+        position: "relative !important",
       }}
     >
-      <TableContainer className={styles.table} sx={{ maxHeight: maxHeight }}>
+      <Backdrop
+        open={loading}
+        sx={{
+          top: 0,
+          zIndex: 10,
+          position: "absolute",
+          backgroundColor: "rgba(230, 230, 230, 0.2)",
+        }}
+      >
+        <CircularProgress size={60} thickness={4} />
+      </Backdrop>
+      <TableContainer className={styles.table} sx={{ maxHeight, minHeight }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <StyledTableRow>
@@ -74,8 +113,8 @@ function UITable<Data extends BaseData>({
                 <TableCell
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: column.minWidth }}
                   className={styles.table__cell}
+                  style={{ minWidth: column.minWidth }}
                 >
                   {column.label}
                 </TableCell>
@@ -83,44 +122,40 @@ function UITable<Data extends BaseData>({
             </StyledTableRow>
           </TableHead>
           <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <StyledTableRow
-                    hover
-                    key={row.id}
-                    tabIndex={-1}
-                    role="checkbox"
-                  >
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell
-                          key={column.id}
-                          align={column.align}
-                          className={styles.table__cell}
-                        >
-                          {column.format && typeof value === "number"
-                            ? column.format(value)
-                            : value}
-                        </TableCell>
-                      );
-                    })}
-                  </StyledTableRow>
-                );
-              })}
+            {validData(tableData).map((row) => {
+              return (
+                <StyledTableRow
+                  hover
+                  key={row.id}
+                  tabIndex={-1}
+                  role="checkbox"
+                >
+                  {columns.map((column) => {
+                    const value = row[column.id];
+                    return (
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        className={styles.table__cell}
+                      >
+                        {column.format ? column.format(value) : value}
+                      </TableCell>
+                    );
+                  })}
+                </StyledTableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         page={page}
         component="div"
-        count={rows.length}
         rowsPerPage={rowsPerPage}
         onPageChange={handleChangePage}
-        rowsPerPageOptions={[10, 25, 100]}
+        rowsPerPageOptions={paginationOptions}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        count={totalRows || validData(tableData).length}
       />
     </Paper>
   );

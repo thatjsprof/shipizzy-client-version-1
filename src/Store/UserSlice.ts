@@ -3,26 +3,10 @@ import MakeGraphQLRequest, {
   checkError,
   IRequestProps,
 } from "Utils/GraphqlRequest";
-import { UserState } from "Interfaces/Auth";
+import { PartialUser, UserState } from "Interfaces/Auth";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: UserState = {
-  user: {
-    id: null,
-    sex: null,
-    email: null,
-    lastName: null,
-    firstName: null,
-    isVerified: null,
-    phoneNumber: null,
-    dateOfBirth: null,
-    accountType: null,
-  },
-  isInitialized: false,
-  isAuthenticated: false,
-};
-
-const emptyUser = {
+const emptyUser: PartialUser = {
   id: null,
   sex: null,
   email: null,
@@ -31,7 +15,15 @@ const emptyUser = {
   isVerified: null,
   phoneNumber: null,
   dateOfBirth: null,
-  acccountType: null,
+  accountType: null,
+  defaultSenderAddress: null,
+  defaultReceiverAddress: null,
+};
+
+const initialState: UserState = {
+  user: emptyUser,
+  isInitialized: false,
+  isAuthenticated: false,
 };
 
 export const retrieveUser = async (userID: string, getUser: any) => {
@@ -78,6 +70,8 @@ export const getCurrentAuthenticatedUser = async (
             dateOfBirth: userData?.dateOfBirth,
             phoneNumber: userData?.phoneNumber,
             accountType: userData?.accountType,
+            defaultSenderAddress: userData?.defaultSenderAddress,
+            defaultReceiverAddress: userData?.defaultReceiverAddress,
           },
           isAuthenticated: userData?._id ? true : false,
         })
@@ -112,12 +106,15 @@ export const LogoutUser = async () => {
 const userSlice = createSlice({
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<{ user: any }>) => {
-      state.user = action.payload.user;
+    setUser: (state, action: PayloadAction<{ user: PartialUser }>) => {
+      state.user = {
+        ...state.user,
+        ...action.payload.user,
+      };
     },
     setCurrentUser: (
       state,
-      action: PayloadAction<{ user: any; isAuthenticated?: boolean }>
+      action: PayloadAction<{ user: PartialUser; isAuthenticated?: boolean }>
     ) => {
       state.isInitialized = true;
       state.user = action.payload.user;

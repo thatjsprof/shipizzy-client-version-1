@@ -31,7 +31,12 @@ const UIModal = ({ title, children, open, handleClose }: UIModalProps) => {
             <Typography id="modal-label" variant="h6" component="h2">
               {title}
             </Typography>
-            <Typography id="modal-description" sx={{ mt: 2 }}>
+            <Typography
+              sx={{
+                mt: 2,
+              }}
+              id="modal-description"
+            >
               {children}
             </Typography>
           </Box>

@@ -1,43 +1,62 @@
-import {
-  FulfillmentTypes,
-  FulfillmentState,
-  FulfillmentStages,
-  FulfillmentOption,
-} from "Interfaces/Fulfillment";
+import { Address } from "Interfaces/Address";
+import { FulfillmentState } from "Interfaces/Fulfillment";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: FulfillmentState = {
+export const initialState: FulfillmentState = {
   id: null,
   stage: null,
   fulfillmentItem: [],
   fulfillmentType: null,
   fulfillmentOption: null,
   fulfillmentSender: null,
+  fulfillmentStatus: null,
   fulfillmentSummary: null,
   fulfillmentReceiver: null,
   fulfillmentShipping: null,
+  fulfillmentTrackingID: null,
+  fulfillmentPaymentInformation: null,
 };
 
 const fulfillmentSlice = createSlice({
   initialState,
   reducers: {
-    setFulfillmentStage: (
-      state,
-      action: PayloadAction<{ stage: FulfillmentStages }>
-    ) => {
-      state.stage = action.payload.stage;
+    setFulfillmentOption: (state, action: PayloadAction<FulfillmentState>) => {
+      const previousState: FulfillmentState = {
+        id: state.id,
+        stage: state.stage,
+        fulfillmentItem: state.fulfillmentItem,
+        fulfillmentType: state.fulfillmentType,
+        fulfillmentOption: state.fulfillmentOption,
+        fulfillmentSender: state.fulfillmentSender,
+        fulfillmentStatus: state.fulfillmentStatus,
+        fulfillmentSummary: state.fulfillmentSummary,
+        fulfillmentReceiver: state.fulfillmentReceiver,
+        fulfillmentShipping: state.fulfillmentShipping,
+        fulfillmentTrackingID: state.fulfillmentTrackingID,
+        fulfillmentPaymentInformation: state.fulfillmentPaymentInformation,
+      };
+
+      const currentState = { ...previousState, ...action.payload };
+
+      state.id = currentState.id;
+      state.stage = currentState.stage;
+      state.fulfillmentItem = currentState.fulfillmentItem;
+      state.fulfillmentType = currentState.fulfillmentType;
+      state.fulfillmentOption = currentState.fulfillmentOption;
+      state.fulfillmentSender = currentState.fulfillmentSender;
+      state.fulfillmentStatus = currentState.fulfillmentStatus;
+      state.fulfillmentSummary = currentState.fulfillmentSummary;
+      state.fulfillmentReceiver = currentState.fulfillmentReceiver;
+      state.fulfillmentShipping = currentState.fulfillmentShipping;
+      state.fulfillmentTrackingID = currentState.fulfillmentTrackingID;
+      state.fulfillmentPaymentInformation =
+        currentState.fulfillmentPaymentInformation;
     },
-    setFulfillmentOption: (
-      state,
-      action: PayloadAction<{
-        type?: FulfillmentTypes | null;
-        stage?: FulfillmentStages | null;
-        option?: FulfillmentOption | null;
-      }>
-    ) => {
-      state.stage = action.payload.stage || null;
-      state.fulfillmentType = action.payload.type || null;
-      state.fulfillmentOption = action.payload.option || null;
+    setFulfilmentSender: (state, action: PayloadAction<Address>) => {
+      state.fulfillmentSender = {
+        ...state.fulfillmentSender,
+        ...action.payload,
+      };
     },
   },
   name: "fulfillment",
@@ -45,5 +64,4 @@ const fulfillmentSlice = createSlice({
 });
 
 export default fulfillmentSlice.reducer;
-export const { setFulfillmentStage, setFulfillmentOption } =
-  fulfillmentSlice.actions;
+export const { setFulfillmentOption } = fulfillmentSlice.actions;

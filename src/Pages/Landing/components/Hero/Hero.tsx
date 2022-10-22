@@ -25,9 +25,9 @@ const Hero = () => {
           <Grid item xs={6}>
             <Box>
               <Typography variant="h2" sx={{ fontSize: "40px" }}>
-                A Reliable Shipping <br /> company for all{" "}
+                Powering Global <br /> Agricultural{" "}
                 <FilterBAndWIcon sx={{ fontSize: "40px", color: "#003060" }} />{" "}
-                <br /> scales of businesses
+                <br /> Exports from Africa
               </Typography>
               <Typography sx={{ maxWidth: "500px", mt: 5 }}>
                 We Provide you with seamless international shipping fulfillment

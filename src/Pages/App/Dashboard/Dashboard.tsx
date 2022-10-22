@@ -1,42 +1,62 @@
-import React from "react";
 import Box from "@mui/material/Box";
 import Menu from "@mui/material/Menu";
 import Fade from "@mui/material/Fade";
 import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
 import ApexCharts from "react-apexcharts";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
+// import Button from "@mui/material/Button";
+// import Divider from "@mui/material/Divider";
 import styles from "./Dashboard.module.scss";
 import { useAppSelector } from "Store/Hooks";
-import AddIcon from "@mui/icons-material/Add";
+// import AddIcon from "@mui/icons-material/Add";
 import Checkbox from "@mui/material/Checkbox";
 import MenuItem from "@mui/material/MenuItem";
 import FormGroup from "@mui/material/FormGroup";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import theme from "../../../App/Layout/CustomTheme";
+// import IconButton from "@mui/material/IconButton";
+import theme from "App/Layout/CustomTheme";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import UICard from "../../../Components/UI/Card/Card.component";
+import UICard from "Components/UI/Card/Card.component";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
-import UIModal from "../../../Components/UI/Modal/Modal.component";
-import UIInput from "../../../Components/UI/Input/Input.component";
-import UIButton from "../../../Components/UI/Button/Button.component";
-import UISelect from "../../../Components/UI/Select/Select.component";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import UIModal from "Components/UI/Modal/Modal.component";
+import UIInput from "Components/UI/Input/Input.component";
+import UIButton from "Components/UI/Button/Button.component";
+import UISelect from "Components/UI/Select/Select.component";
+import { formatNumber } from "Utils/Helpers";
+import { add, format, getTime, sub } from "date-fns";
+// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+
+interface IProp {
+  totalAmount: any;
+  totalMonthlyTransactions: any;
+}
 
 type quickActions = "Withdraw" | "Fund";
 
 const DOLLAR_RATE = 570;
+const NO_OF_MONTHS = 6;
 
-const Dashboard = () => {
-  const series = [
-    {
-      name: "Income",
-      data: [31, 40, 28, 51, 42, 109, 100],
-    },
-  ];
+const currentDate = new Date();
+const lastDatePeriod = sub(currentDate, { months: NO_OF_MONTHS - 1 });
 
-  const options = {
+const dates: Date[] = [];
+const months: string[] = [];
+let month: Date = lastDatePeriod;
+
+while (getTime(month) <= getTime(currentDate)) {
+  dates.push(month);
+  month = add(month, { months: 1 });
+}
+
+dates.forEach((entry) => {
+  const month = format(entry, "LLLL");
+  months.push(month.substring(0, 3));
+});
+
+const Dashboard = ({ totalAmount, totalMonthlyTransactions }: IProp) => {
+  // const [open, setOpen] = React.useState<boolean>(false);
+  const [nairaAmount, setNairaAmount] = React.useState<number>(0);
+  const [options, setOptions] = React.useState<any>({
     colors: ["#055C9D"],
     chart: {
       toolbar: {
@@ -50,7 +70,7 @@ const Dashboard = () => {
       show: false,
     },
     xaxis: {
-      categories: [],
+      categories: months,
     },
     yaxis: {
       show: true,
@@ -60,21 +80,27 @@ const Dashboard = () => {
         format: "dd/MM/yy HH:mm",
       },
     },
-  };
-
-  const [open, setOpen] = React.useState<boolean>(false);
-  const [nairaAmount, setNairaAmount] = React.useState<number>(0);
+  });
+  const [series, setSeries] = React.useState<
+    { name: string; data: number[] }[]
+  >([
+    {
+      name: "Amount",
+      data: Array.from({ length: NO_OF_MONTHS }, () => 0),
+    },
+  ]);
+  const [transactionTotal, setTransactionTotal] = React.useState<number>(0);
   const [dollarAmount, setDollarAmount] = React.useState<number>(0);
   const [openQuickActionModal, setOpenQuickActionModal] =
     React.useState<boolean>(false);
   const [quickAction, setQuickAction] = React.useState<string>("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // const handleOpen = () => setOpen(true);
+  // const handleClose = () => setOpen(false);
   const openAction = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
   const { user } = useAppSelector((state) => state.user);
 
   const handleCloseAction = (value: quickActions) => {
@@ -97,6 +123,50 @@ const Dashboard = () => {
     setDollarAmount(Number((+value / DOLLAR_RATE).toFixed(2)));
     setNairaAmount(+value);
   };
+
+  const getTotalAmount = async (id: string) => {
+    const totalAm = totalAmount({ userID: id });
+    const totalMon = totalMonthlyTransactions({
+      userID: id,
+      noOfMonths: NO_OF_MONTHS,
+    });
+
+    const [result1, result2] = await Promise.all([totalAm, totalMon]);
+
+    setTransactionTotal(result1.totalTransactionsAmount);
+
+    const categories: string[] = [];
+    const data: number[] = [];
+
+    result2.totalMonthlyTransactions.forEach(
+      ({ month, total }: { total: number; year: number; month: string }) => {
+        categories.push(month.substring(0, 3));
+        data.push(total);
+      }
+    );
+
+    setOptions((prevOptions: any) => ({
+      ...prevOptions,
+      xaxis: {
+        categories,
+      },
+    }));
+
+    setSeries(() => {
+      return [
+        {
+          data,
+          name: "Amount",
+        },
+      ];
+    });
+  };
+
+  useEffect(() => {
+    getTotalAmount(user.id as string);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
 
   return (
     <div className={styles.dashboard}>
@@ -181,7 +251,7 @@ const Dashboard = () => {
                   variant="h5"
                   sx={{ color: "#fff", fontWeight: 700 }}
                 >
-                  ₦0.00
+                  ₦{formatNumber().format(transactionTotal)}
                 </Typography>
               </UICard>
             </Link>

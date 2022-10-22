@@ -1,7 +1,8 @@
 import "./Button.module.scss";
-import Button from "@mui/material/Button";
+import { Modify } from "Utils/Helpers";
 import React, { PropsWithChildren } from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
+import Button, { ButtonProps } from "@mui/material/Button";
 
 type UIButtonProps = PropsWithChildren<{
   styles?: object;
@@ -16,7 +17,10 @@ type UIButtonProps = PropsWithChildren<{
   handleClick?: React.MouseEventHandler<HTMLButtonElement>;
 }>;
 
+export type CustomButtonProps = Modify<ButtonProps, UIButtonProps>;
+
 const UIButton = ({
+  sx,
   type,
   size,
   styles,
@@ -27,7 +31,7 @@ const UIButton = ({
   startIcon,
   handleClick,
   disabled = false,
-}: UIButtonProps) => {
+}: CustomButtonProps) => {
   return (
     <Button
       type={type}
@@ -48,7 +52,8 @@ const UIButton = ({
             boxShadow: "none",
           },
         },
-        styles
+        styles,
+        sx
       )}
     >
       {children}
@@ -57,6 +62,7 @@ const UIButton = ({
 };
 
 export const UILoadingButton = ({
+  sx,
   type,
   size,
   styles,
@@ -68,7 +74,7 @@ export const UILoadingButton = ({
   startIcon,
   handleClick,
   disabled = false,
-}: UIButtonProps) => {
+}: CustomButtonProps) => {
   return (
     <LoadingButton
       type={type}
@@ -90,7 +96,8 @@ export const UILoadingButton = ({
             boxShadow: "none",
           },
         },
-        styles
+        styles,
+        sx
       )}
     >
       {children}
