@@ -1,19 +1,21 @@
+import Box from "@mui/material/Box";
 import List from "@mui/material/List";
-import React, { useState } from "react";
 import styles from "./Sidebar.module.scss";
 import theme from "App/Layout/CustomTheme";
+// import Tooltip from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 import Collapse from "@mui/material/Collapse";
 import HomeIcon from "@mui/icons-material/Home";
 import Typography from "@mui/material/Typography";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import SavingsIcon from "@mui/icons-material/Savings";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
+// import InboxIcon from "@mui/icons-material/MoveToInbox";
+// import ExpandLess from "@mui/icons-material/ExpandLess";
+// import ExpandMore from "@mui/icons-material/ExpandMore";
 import StarBorder from "@mui/icons-material/StarBorder";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ListSubheader from "@mui/material/ListSubheader";
@@ -22,6 +24,11 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+
+type LinkWrapper = {
+  active?: boolean;
+  children: React.ReactElement;
+};
 
 const NormalLinks: LinksType = [
   { icon: "DashboardIcon", name: "Dashboard", active: true, url: "/dashboard" },
@@ -76,11 +83,25 @@ const CustomButtonStyled = styled(ListItemButton)(() => ({
 const Sidebar = () => {
   const location = useLocation();
 
-  const [open, setOpen] = useState<boolean>(false);
+  const [open] = useState<boolean>(false);
   // const [openSettings, setOpenSettings] = useState<boolean>(false);
   const [selectedRoute, setSelectedRoute] = React.useState(location.pathname);
 
-  const handleClick = () => setOpen(() => !open);
+  // const handleClick = () => setOpen(() => !open);
+
+  const LinkWrapper = ({ active, children }: LinkWrapper) => {
+    return active ? (
+      children
+    ) : (
+      // <Tooltip sx={{}} title="Coming Soon" placement="top-start">
+      <Box component="span">{children}</Box>
+      // </Tooltip>
+    );
+  };
+
+  useEffect(() => {
+    setSelectedRoute(location.pathname);
+  }, [location.pathname]);
 
   return (
     <div className={styles.sidebar}>
@@ -94,17 +115,23 @@ const Sidebar = () => {
           const Icon = IconsArray[icon];
           return (
             <Link key={index} to={active ? url : "#"}>
-              <CustomButtonStyled
-                disabled={!active}
-                selected={selectedRoute === url}
-                sx={{ mb: ".5rem", color: "#424a57" }}
-                onClick={() => setSelectedRoute(url)}
-              >
-                <ListItemIcon>
-                  <Icon />
-                </ListItemIcon>
-                <ListItemText primary={name} />
-              </CustomButtonStyled>
+              <LinkWrapper active={active}>
+                <CustomButtonStyled
+                  disabled={!active}
+                  selected={selectedRoute === url}
+                  sx={{
+                    mb: ".5rem",
+                    color: "#424a57",
+                    pointerEvents: !active ? "none" : "inherit",
+                  }}
+                  onClick={() => setSelectedRoute(url)}
+                >
+                  <ListItemIcon>
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText primary={name} />
+                </CustomButtonStyled>
+              </LinkWrapper>
             </Link>
           );
         })}
@@ -120,31 +147,33 @@ const Sidebar = () => {
             </ListSubheader>
           }
         >
-          {ExportLinks.map(({ icon, name, url }, index) => {
+          {ExportLinks.map(({ icon, name, url, active }, index) => {
             const Icon = IconsArray[icon];
 
             return (
               <Link key={index} to={url}>
-                <CustomButtonStyled
-                  sx={{ mb: ".5rem", color: "#424a57" }}
-                  selected={selectedRoute.includes(url)}
-                  onClick={() => setSelectedRoute(url)}
-                >
-                  <ListItemIcon>
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText primary={name} />
-                </CustomButtonStyled>
+                <LinkWrapper active={active}>
+                  <CustomButtonStyled
+                    sx={{ mb: ".5rem", color: "#424a57" }}
+                    selected={selectedRoute.includes(url)}
+                    onClick={() => setSelectedRoute(url)}
+                  >
+                    <ListItemIcon>
+                      <Icon />
+                    </ListItemIcon>
+                    <ListItemText primary={name} />
+                  </CustomButtonStyled>
+                </LinkWrapper>
               </Link>
             );
           })}
-          <ListItemButton sx={{ mb: ".5rem" }} disabled onClick={handleClick}>
+          {/* <ListItemButton sx={{ mb: ".5rem" }} disabled onClick={handleClick}>
             <ListItemIcon>
               <InboxIcon />
             </ListItemIcon>
             <ListItemText primary="Promotions" />
             {open ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
+          </ListItemButton> */}
           <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               <ListItemButton sx={{ pl: 4, mb: ".5rem" }}>

@@ -1,7 +1,8 @@
+import { isJSON } from "./Helpers";
 import toast from "react-hot-toast";
 import Lf from "./LocalForage/config";
 
-interface RQProps {
+export interface RQProps {
   variables: any;
 }
 
@@ -10,7 +11,7 @@ export interface IRequestProps {
   requestFunction: (props?: RQProps) => Promise<any>;
 }
 
-interface IError {
+export interface IError {
   errors: Array<any>;
   networkError: string | null;
 }
@@ -56,13 +57,26 @@ const MakeGraphQLRequest = async <ReturnType extends unknown>({
       };
     }
 
-    const gqlErrors = err.graphQLErrors.map((error: any) => error.message);
+    const gqlErrors = err.graphQLErrors.map((error: any) => {
+      let isMessage = error.message;
 
-    if (gqlErrors.length > 0) {
+      if (isJSON(error.message)) {
+        const parsedJSON = JSON.parse(error.message);
+        isMessage = Array.isArray(parsedJSON)
+          ? parsedJSON.map((val) => val.message)
+          : error.message;
+      }
+
+      return isMessage;
+    });
+
+    const gqlErrorsFlat = gqlErrors.flat();
+
+    if (gqlErrorsFlat.length > 0) {
       initialResult = {
         ...initialResult,
         error: {
-          errors: gqlErrors,
+          errors: gqlErrorsFlat,
           networkError: null,
         },
       };
@@ -78,6 +92,7 @@ export const checkError = async (error: IError | null) => {
 
     if (networkError) {
       toast.error(networkError);
+      Lf.removeItem("authToken");
     }
 
     if (errors) {

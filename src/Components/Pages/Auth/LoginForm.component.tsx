@@ -4,6 +4,9 @@ import { ISignIn } from "Interfaces/Auth";
 import { useForm } from "react-hook-form";
 import Lf from "Utils/LocalForage/config";
 import { AuthSchema } from "../../../Schemas";
+import UIButton, {
+  UILoadingButton,
+} from "Components/UI/Button/Button.component";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import React, { useState, Fragment } from "react";
@@ -17,7 +20,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { getCurrentAuthenticatedUser } from "Store/UserSlice";
 import UIOutlinedInput from "Components/UI/Input/OutlinedInput.component";
-import UIButton, { UILoadingButton } from "Components/UI/Button/Button.component";
 
 interface ILoginForm {
   getUser: any;
@@ -48,8 +50,8 @@ const LoginForm = ({
       email: "",
       password: "",
     },
-    mode: "onSubmit",
-    reValidateMode: "onChange",
+    mode: "onBlur",
+    reValidateMode: "onBlur",
     resolver: yupResolver(AuthSchema.loginValidation),
   });
 
@@ -68,8 +70,13 @@ const LoginForm = ({
   };
 
   const onSubmit = async (payload: ISignIn) => {
+    const { email } = payload;
+
     const data = await loginUser({
-      authDetails: payload,
+      authDetails: {
+        ...payload,
+        email: email.toLowerCase(),
+      },
     });
 
     if (data) {

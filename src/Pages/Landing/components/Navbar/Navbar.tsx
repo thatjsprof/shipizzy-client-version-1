@@ -21,9 +21,10 @@ const Navbar = () => {
         >
           <Box>
             <Link to="/">
-              <img
+              <Box
                 alt="Logo"
                 height="30px"
+                component="img"
                 src="/Images/Logo/Logo.png"
                 style={{ marginLeft: "-9px" }}
               />

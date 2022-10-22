@@ -34,6 +34,8 @@ const LoginFormContainer = ({
 
     setLoading(true);
 
+    console.log(payload);
+
     const { error, data } = await MakeGraphQLRequest(requestOptions);
 
     setLoading(false);

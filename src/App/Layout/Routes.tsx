@@ -3,10 +3,10 @@ import { AuthRoutes, LandingRoutes, AppRoutes } from "Services/Routes";
 const {
   TransactionsRoutes,
   FulfillmentsRoutes,
-  WalletRoutes,
   InvestmentsRoutes,
   DashboardRoutes,
   SettingsRoutes,
+  WalletRoutes,
 } = AppRoutes;
 const AppLayout = React.lazy(() => import("Layouts/AppLayout"));
 const AuthGuard = React.lazy(() => import("Utils/AuthGuard"));
@@ -36,7 +36,7 @@ const FulfillmentsPage = React.lazy(
   () => import("Pages/App/Fulfillments/Fulfillments.container")
 );
 const FulfillmentsLayout = React.lazy(
-  () => import("Pages/App/Fulfillments/FulfillmentsLayout")
+  () => import("Pages/App/Fulfillments/FulfillmentsLayout.container")
 );
 const WalletPage = React.lazy(
   () => import("Pages/App/Wallet/Wallet.container")
