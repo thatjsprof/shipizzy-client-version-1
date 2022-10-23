@@ -7,14 +7,14 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import theme from "../../../App/Layout/CustomTheme";
+import theme from "App/Layout/CustomTheme";
 import { Link, useLocation } from "react-router-dom";
 import {
   DECODE_TOKEN,
   VERIFY_USER,
-} from "../../../Graphql/Resolvers/Users/Users.mutationdefs";
+} from "Graphql/Resolvers/Users/Users.mutationdefs";
 import CircularProgress from "@mui/material/CircularProgress";
-import UIButton from "../../../Components/UI/Button/Button.component";
+import UIButton from "Components/UI/Button/Button.component";
 
 interface ResponseInterface {
   message: string;
@@ -26,13 +26,33 @@ const Response = ({ message, status }: ResponseInterface) => {
     <div>
       {status ? (
         <CheckIcon
-          sx={{ fontSize: "6rem", color: theme.palette.success.main }}
+          sx={{
+            fontSize: "6rem",
+            color: theme.palette.success.main,
+          }}
         />
       ) : (
-        <ClearIcon sx={{ fontSize: "6rem", color: theme.palette.error.main }} />
+        <ClearIcon
+          sx={{
+            fontSize: "6rem",
+            color: theme.palette.error.main,
+          }}
+        />
       )}
-      <Typography sx={{ mt: 2, fontSize: "2rem" }}>{message}</Typography>
-      <Typography sx={{ mt: 3, fontSize: "2rem" }}>
+      <Typography
+        sx={{
+          mt: 2,
+          fontSize: "2rem",
+        }}
+      >
+        {message}
+      </Typography>
+      <Typography
+        sx={{
+          mt: 3,
+          fontSize: "2rem",
+        }}
+      >
         Click{" "}
         <Link to="/login" style={{ color: theme.palette.primary.main }}>
           here

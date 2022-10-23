@@ -72,18 +72,18 @@ const Addresses = ({
   const subAddresses = addresses.subAddresses as Required<Address[]>;
 
   const listAddresses = React.useCallback(async () => {
-    if (mainAddresses.length === 0 || subAddresses.length === 0) {
-      let requestOptions: IRequestProps = {
-        payloadOptions: {
-          variables: {
-            id: user.id as string,
-          },
+    // if (mainAddresses.length === 0 || subAddresses.length === 0) {
+    let requestOptions: IRequestProps = {
+      payloadOptions: {
+        variables: {
+          id: user.id as string,
         },
-        requestFunction: makeGetAddress,
-      };
+      },
+      requestFunction: makeGetAddress,
+    };
 
-      await getAddresses(requestOptions);
-    }
+    await getAddresses(requestOptions);
+    // }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id, mainAddresses, subAddresses]);

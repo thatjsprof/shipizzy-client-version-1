@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
-import LoginFormContainer from "../../../Components/Pages/Auth/LoginForm.container";
+import LoginFormContainer from "Components/Pages/Auth/LoginForm.container";
 
 const LoginPage = () => {
   return (
