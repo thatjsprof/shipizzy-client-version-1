@@ -42,6 +42,7 @@ const MakeGraphQLRequest = async <ReturnType extends unknown>({
       data: data.data,
     };
   } catch (err: any) {
+    console.log(err);
     initialResult = {
       data: null,
       error: null,

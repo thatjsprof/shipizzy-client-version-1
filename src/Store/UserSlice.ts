@@ -49,6 +49,8 @@ export const getCurrentAuthenticatedUser = async (
         requestOptionsDecodeToken
       );
 
+      console.log(error);
+
       checkError(error);
 
       const nullData = { id: null, _id: null, name: null, email: null };
