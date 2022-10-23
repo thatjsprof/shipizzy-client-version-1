@@ -23,7 +23,7 @@ const errorLink = onError(({ graphQLErrors, networkError }: any) => {
 
 // "https://localhost/graphql"
 // "https://shipizzy-server.herokuapp.com/graphql"
-let uri = "http://localhost:4001/graphql";
+let uri = "https://shipizzy-server.herokuapp.com/graphql";
 
 const httpLink = createHttpLink({
   uri,
